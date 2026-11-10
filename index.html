@@ -1,0 +1,2203 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="theme-color" content="#0b0d12">
+<title>X 起号模拟器</title>
+<meta name="description" content="0 粉丝，90 天。发帖、蹭热点、被限流、被封号。看看你能把一个号做成什么样。">
+<meta property="og:title" content="X 起号模拟器">
+<meta property="og:description" content="0 粉丝，90 天。发帖、蹭热点、被限流、被封号。看看你能把一个号做成什么样。">
+<meta name="twitter:card" content="summary">
+<style>
+:root, html[data-theme="light"] {
+  --bg: #ffffff; --page: #f3f4f1; --panel: #f7f8f8; --panel2: #eef1f2; --line: #dfe5e8;
+  --text: #0f1419; --soft: #2b3238; --muted: #536471; --dim: #84909a;
+  --red: #d63a2f; --gold: #9c7410; --green: #0b8a55;
+  --inv: #0f1419; --invt: #ffffff; --hl: #fbf4df; --hlline: #dcc27a; --press: #e3e8ea; --maskc: rgba(15,20,25,.45);
+  --serif: "Songti SC", "Noto Serif SC", "Source Han Serif SC", STSong, SimSun, serif;
+  --sans: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans SC", sans-serif;
+  --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+html[data-theme="dark"] {
+  --bg: #15202b; --page: #0e161e; --panel: #1b2836; --panel2: #223140; --line: #33434f;
+  --text: #f1f3f4; --soft: #d5dadd; --muted: #93a1ad; --dim: #6b7b88;
+  --red: #f0625a; --gold: #e0b95c; --green: #5fc795;
+  --inv: #f1f3f4; --invt: #15202b; --hl: #2c2a1c; --hlline: #6b5a2a; --press: #2a3b4b; --maskc: rgba(5,9,13,.7);
+}
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { margin: 0; height: 100%; background: var(--page); color: var(--text); font-family: var(--sans); font-size: 15px; line-height: 1.55; overflow: hidden; overscroll-behavior: none; }
+button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; text-align: left; }
+button:disabled { cursor: not-allowed; }
+a { color: var(--gold); }
+#app { position: relative; max-width: 480px; height: 100vh; height: 100dvh; margin: 0 auto; background: var(--bg); display: flex; flex-direction: column; overflow: hidden; }
+@media (min-width: 481px) { #app { border-left: 1px solid var(--line); border-right: 1px solid var(--line); } }
+.scroll { scrollbar-width: thin; scrollbar-color: var(--line) transparent; overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; }
+.red { color: var(--red); } .gold { color: var(--gold); } .green { color: var(--green); } .muted { color: var(--muted); }
+.brand, .me, .right { display: none; }
+
+/* ---------- 首页 ---------- */
+.home { flex: 1; display: flex; flex-direction: column; padding: 28px 22px 18px; }
+.clock { font-family: var(--mono); color: var(--dim); font-size: 12px; letter-spacing: 2px; display: flex; justify-content: space-between; }
+.hero { flex: 1; display: flex; flex-direction: column; justify-content: center; min-height: 0; padding: 18px 0; }
+.cards { position: relative; height: 150px; margin-bottom: 26px; flex: none; }
+.pcard { position: absolute; left: 50%; top: 0; width: 100px; height: 140px; margin-left: -50px; border-radius: 9px; background: #f6f2e8; color: #15171d; border: 1px solid #d9d3c3;
+  box-shadow: 0 10px 26px rgba(0,0,0,.22); font-family: var(--serif); padding: 7px 9px; display: flex; flex-direction: column; justify-content: space-between; }
+.pcard b { font-size: 21px; line-height: 1; font-weight: 700; } .pcard i { font-style: normal; font-size: 13px; display: block; }
+.pcard .mid { text-align: center; font-size: 34px; line-height: 1; } .pcard .bot { transform: rotate(180deg); }
+.pcard.r { color: #c23a30; }
+.pcard.c1 { transform: translateX(-74px) rotate(-13deg); } .pcard.c2 { transform: translateY(-6px); z-index: 2; } .pcard.c3 { transform: translateX(74px) rotate(13deg); }
+.pcard.back { background: repeating-linear-gradient(45deg, #1d2231 0 6px, #2a3147 6px 12px); border: 4px solid #f6f2e8; }
+h1.title { font-family: var(--serif); font-size: 38px; line-height: 1.15; margin: 0 0 10px; font-weight: 700; letter-spacing: 1px; }
+h1.title em { font-style: normal; color: var(--red); }
+.tagline { color: var(--muted); margin: 0 0 22px; font-size: 15px; }
+.btn { display: block; width: 100%; text-align: center; padding: 13px 16px; border-radius: 999px; font-size: 16px; font-weight: 700; border: 1px solid var(--line); background: var(--bg); margin-top: 10px; }
+.btn.primary { background: var(--inv); color: var(--invt); border-color: var(--inv); }
+.btn.small { padding: 9px 12px; font-size: 14px; font-weight: 600; }
+.btn:active { transform: translateY(1px); opacity: .85; }
+.row { display: flex; gap: 10px; } .row .btn { flex: 1; }
+.foot { color: var(--dim); font-size: 11.5px; line-height: 1.6; margin-top: 16px; text-align: center; }
+.foot a { color: var(--muted); }
+
+/* ---------- 开局 / 通用页 ---------- */
+.page { flex: 1; display: flex; flex-direction: column; min-height: 0; }
+.page-h { padding: 16px 18px 10px; border-bottom: 1px solid var(--line); display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+.page-h h2 { font-family: var(--serif); font-size: 21px; margin: 0; }
+.page-b { flex: 1; padding: 14px 16px 20px; }
+.page-f { padding: 10px 16px calc(12px + env(safe-area-inset-bottom)); border-top: 1px solid var(--line); background: var(--bg); }
+.sec { color: var(--muted); font-size: 12.5px; letter-spacing: 1px; margin: 16px 2px 8px; } .sec:first-child { margin-top: 2px; }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.opt { display: block; width: 100%; padding: 11px 12px; border-radius: 12px; border: 1px solid var(--line); background: var(--panel); min-height: 74px; }
+.opt b { display: block; font-size: 15px; } .opt span { display: block; color: var(--muted); font-size: 12px; line-height: 1.45; margin-top: 3px; }
+.opt.on { border-color: var(--hlline); background: var(--hl); } .opt.on b { color: var(--gold); }
+.list .opt { min-height: 0; margin-bottom: 8px; }
+
+/* ---------- 游戏 ---------- */
+.bar { padding: 8px 14px 7px; border-bottom: 1px solid var(--line); background: var(--bg); }
+.bar-top { display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: var(--muted); gap: 8px; }
+.bar-top .menu { color: var(--muted); padding: 2px 9px; border: 1px solid var(--line); border-radius: 999px; font-size: 12px; flex: none; }
+.prog { height: 3px; background: var(--panel2); border-radius: 2px; margin: 6px 0 6px; overflow: hidden; } .prog i { display: block; height: 100%; background: var(--gold); transition: width .4s; }
+.stats { display: grid; grid-template-columns: 1.25fr 1fr 1fr 1.15fr; gap: 6px; }
+.stat { min-width: 0; } .stat small { display: block; color: var(--dim); font-size: 11px; white-space: nowrap; }
+.stat b { display: block; font-size: 17px; font-family: var(--mono); font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 600; }
+.stat b.txt { font-family: var(--sans); font-size: 14px; line-height: 25.5px; }
+.sub { display: flex; gap: 12px; color: var(--dim); font-size: 11.5px; margin-top: 4px; white-space: nowrap; overflow: hidden; }
+.hot { padding: 6px 14px; font-size: 12.5px; color: var(--muted); border-bottom: 1px solid var(--line); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; background: var(--panel); }
+.hot b { color: var(--red); font-weight: 600; }
+.feed { flex: 1; padding: 10px 12px 14px; min-height: 0; background: var(--bg); }
+.it { margin-bottom: 10px; animation: in .28s ease-out; }
+@keyframes in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .it { animation: none; } }
+.it.sys { text-align: center; color: var(--dim); font-size: 12.5px; padding: 2px 10px; }
+.it.noti { color: var(--muted); font-size: 13px; background: var(--panel); border-radius: 10px; padding: 8px 12px; }
+.it.noti i { font-style: normal; font-size: 11px; color: var(--invt); background: var(--muted); border-radius: 4px; padding: 1px 5px; margin-right: 7px; }
+.it.turn { text-align: center; color: var(--dim); font-size: 11.5px; letter-spacing: 3px; margin: 16px 0 12px; position: relative; }
+.it.turn::before { content: ""; position: absolute; left: 0; right: 0; top: 50%; border-top: 1px dashed var(--line); } .it.turn span { position: relative; background: var(--bg); padding: 0 10px; }
+.it.act { color: var(--muted); font-size: 13px; padding: 1px 4px 1px 12px; border-left: 2px solid var(--line); }
+.it.event { background: var(--hl); border-left: 3px solid var(--gold); border-radius: 0 8px 8px 0; padding: 9px 12px; font-size: 13.5px; }
+.it.event small { display: block; color: var(--gold); font-size: 11.5px; margin-bottom: 2px; font-weight: 600; }
+.card { background: var(--bg); border: 1px solid var(--line); border-radius: 14px; padding: 11px 13px; }
+.card.viral { border-color: var(--red); box-shadow: 0 0 0 1px var(--red) inset; }
+.who { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; font-size: 13px; min-width: 0; }
+.ava { flex: none; width: 28px; height: 28px; border-radius: 50%; background: var(--panel2); border: 1px solid var(--line); display: grid; place-items: center; font-size: 13px; color: var(--muted); font-family: var(--serif); }
+.ava.me { background: var(--inv); color: var(--invt); border-color: var(--inv); font-family: var(--sans); font-weight: 700; font-size: 12px; }
+.who b { font-weight: 700; white-space: nowrap; } .who span { color: var(--dim); font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tag { margin-left: auto; flex: none; font-size: 11px; padding: 1px 8px; border-radius: 20px; border: 1px solid var(--line); color: var(--muted); }
+.tag.boom { background: var(--red); border-color: var(--red); color: #fff; }
+.body { font-size: 15px; word-break: break-word; }
+.meta { display: flex; gap: 14px; margin-top: 8px; color: var(--dim); font-size: 12px; align-items: baseline; flex-wrap: wrap; }
+.meta b { color: var(--text); font-family: var(--mono); font-weight: 500; } .meta .gain { margin-left: auto; color: var(--green); font-family: var(--mono); font-weight: 600; }
+.note { margin-top: 7px; color: var(--muted); font-size: 12.5px; border-top: 1px dashed var(--line); padding-top: 6px; }
+.cm { margin-top: 7px; padding: 6px 10px; background: var(--panel); border-radius: 10px; font-size: 13px; color: var(--soft); }
+.cm b { font-weight: 600; margin-right: 7px; color: var(--muted); font-size: 12px; } .cm.solo { color: var(--dim); font-size: 12.5px; }
+.rival .body { color: var(--soft); }
+
+.dock { border-top: 1px solid var(--line); background: var(--bg); padding: 8px 12px calc(10px + env(safe-area-inset-bottom)); }
+.dock-top { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.pips { display: flex; gap: 4px; align-items: center; } .pips span { font-size: 12px; color: var(--muted); margin-right: 2px; }
+.pips i { display: block; width: 14px; height: 18px; border-radius: 4px; background: var(--green); } .pips i.off { background: var(--panel2); box-shadow: 0 0 0 1px var(--line) inset; }
+.undo { flex: none; padding: 7px 12px; border-radius: 999px; border: 1px solid var(--line); font-size: 13px; color: var(--muted); font-weight: 600; }
+.queue { flex: 1; min-width: 0; font-size: 12px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.endbtn { flex: none; padding: 8px 16px; border-radius: 999px; background: var(--inv); color: var(--invt); font-weight: 700; font-size: 14px; }
+.endbtn.pulse { background: var(--red); color: #fff; }
+.tabs { display: flex; gap: 6px; margin-bottom: 8px; }
+.tabs button { flex: 1; text-align: center; padding: 6px 0; border-radius: 999px; font-size: 13px; color: var(--muted); border: 1px solid transparent; }
+.tabs button.on { color: var(--text); background: var(--panel2); border-color: var(--line); font-weight: 600; }
+.acts { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; height: 174px; align-content: start; }
+.a { padding: 7px 10px; border-radius: 10px; border: 1px solid var(--line); background: var(--panel); min-width: 0; height: 54px; overflow: hidden; }
+.a .n { display: flex; justify-content: space-between; align-items: baseline; gap: 6px; font-size: 14px; font-weight: 700; white-space: nowrap; }
+.a .n i { font-style: normal; color: var(--muted); font-size: 11.5px; font-weight: 500; }
+.a .d { color: var(--dim); font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 1px; }
+.a:disabled { opacity: .4; } .a:not(:disabled):active { background: var(--press); }
+@media (hover: hover) { .a:not(:disabled):hover, .ch:not(:disabled):hover, .opt:hover { background: var(--panel2); } }
+
+/* ---------- 弹层 ---------- */
+.mask { position: absolute; inset: 0; background: var(--maskc); display: flex; align-items: flex-end; justify-content: center; z-index: 20; animation: fade .2s; }
+@keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+.sheet { width: 100%; max-height: 88%; background: var(--bg); border-top: 1px solid var(--line); border-radius: 18px 18px 0 0; padding: 18px 16px calc(16px + env(safe-area-inset-bottom)); animation: up .25s ease-out; }
+@keyframes up { from { transform: translateY(30px); opacity: 0; } to { transform: none; opacity: 1; } }
+.sheet h3 { font-family: var(--serif); font-size: 20px; margin: 0 0 4px; display: flex; align-items: center; gap: 8px; }
+.sheet h3 i { font-style: normal; color: var(--red); }
+.sheet .k { color: var(--dim); font-size: 11.5px; letter-spacing: 2px; margin-bottom: 8px; }
+.sheet p { margin: 8px 0 14px; font-size: 15.5px; }
+.sheet .res { background: var(--hl); border-radius: 10px; padding: 12px 13px; border-left: 3px solid var(--gold); }
+.ch { display: block; width: 100%; padding: 12px 14px; border-radius: 12px; border: 1px solid var(--line); background: var(--panel); margin-top: 8px; font-size: 14.5px; }
+.ch:disabled { opacity: .4; } .ch small { color: var(--dim); margin-left: 6px; }
+.delta { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 12px 0; }
+.delta div { background: var(--panel); border-radius: 12px; padding: 9px 10px; } .delta small { display: block; color: var(--dim); font-size: 11.5px; } .delta b { font-family: var(--mono); font-size: 18px; }
+.notes { margin: 0 0 6px; padding: 0; list-style: none; color: var(--muted); font-size: 13.5px; } .notes li { padding: 5px 0; border-top: 1px dashed var(--line); }
+
+/* ---------- 结局 ---------- */
+.end { padding: 22px 18px 26px; }
+.end .k { color: var(--dim); font-size: 12px; letter-spacing: 3px; }
+.end h2 { font-family: var(--serif); font-size: 31px; line-height: 1.2; margin: 6px 0 12px; }
+.end .d { font-size: 15.5px; color: var(--soft); margin: 0 0 16px; }
+.kv { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 14px; }
+.kv div { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 9px 10px; min-width: 0; } .kv small { display: block; color: var(--dim); font-size: 11.5px; } .kv b { font-family: var(--mono); font-size: 16px; white-space: nowrap; }
+.cardimg { display: block; width: 100%; max-width: 300px; margin: 6px auto 4px; border-radius: 12px; border: 1px solid var(--line); }
+.hint { text-align: center; color: var(--dim); font-size: 12px; margin-bottom: 8px; }
+.newach { background: var(--hl); border: 1px solid var(--hlline); border-radius: 12px; padding: 9px 12px; margin-bottom: 14px; font-size: 13.5px; } .newach b { color: var(--gold); }
+.toast { position: absolute; left: 50%; bottom: 90px; transform: translateX(-50%); background: var(--inv); color: var(--invt); padding: 8px 14px; border-radius: 20px; font-size: 13px; z-index: 40; white-space: nowrap; animation: fade .2s; }
+
+/* ---------- 图鉴 ---------- */
+.dex { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.dx { border: 1px solid var(--line); border-radius: 12px; padding: 10px 11px; background: var(--panel); min-height: 68px; }
+.dx b { display: block; font-size: 14px; font-family: var(--serif); } .dx span { display: block; color: var(--muted); font-size: 12px; line-height: 1.45; margin-top: 3px; }
+.dx.lock { opacity: .55; } .dx.lock b { color: var(--dim); font-family: var(--mono); }
+.dx.got { border-color: var(--hlline); background: var(--hl); }
+
+/* ---------- 电脑版：三栏 ---------- */
+@media (min-width: 1000px) {
+  html, body { background: var(--bg); }
+  #app { max-width: 1240px; border: 0; }
+  #app > .home, #app > .page { width: 100%; max-width: 600px; margin: 0 auto; border-left: 1px solid var(--line); border-right: 1px solid var(--line); }
+  #app.game { display: grid; grid-template-columns: 270px minmax(0, 1fr) 350px; grid-template-rows: auto minmax(0, 1fr); grid-template-areas: "bar dock right" "bar feed right"; }
+  .hot { display: none; }
+  .bar { grid-area: bar; border: 0; padding: 14px 22px 20px 12px; overflow-y: auto; }
+  .brand { display: flex; align-items: center; gap: 10px; padding: 6px 10px 18px; font-family: var(--serif); font-size: 22px; }
+  .brand b { font-weight: 700; }
+  .me { display: flex; align-items: center; gap: 10px; padding: 10px; margin-bottom: 14px; }
+  .me .ava { width: 40px; height: 40px; font-size: 15px; } .me b { display: block; font-size: 15px; line-height: 1.3; } .me span { display: block; color: var(--muted); font-size: 13px; }
+  .bar-top { padding: 0 10px; font-size: 13px; } .prog { margin: 8px 10px 14px; height: 4px; }
+  .stats { grid-template-columns: 1fr 1fr; gap: 8px; padding: 0 2px; }
+  .stat { background: var(--panel); border-radius: 14px; padding: 10px 12px; } .stat small { font-size: 12px; } .stat b { font-size: 21px; } .stat b.txt { font-size: 16px; line-height: 31.5px; }
+  .sub { flex-direction: column; gap: 4px; font-size: 13px; padding: 14px 12px 0; color: var(--muted); }
+  .dock { grid-area: dock; border-top: 0; border-left: 1px solid var(--line); border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); padding: 14px 18px 14px; }
+  .dock-top { margin-bottom: 12px; } .pips i { width: 18px; height: 22px; } .pips span { font-size: 14px; } .queue { font-size: 14px; }
+  .endbtn { padding: 10px 22px; font-size: 15px; }
+  .tabs { margin-bottom: 10px; } .tabs button { padding: 8px 0; font-size: 14px; }
+  .acts { grid-template-columns: repeat(3, 1fr); height: 160px; gap: 8px; }
+  .a { height: 76px; padding: 9px 12px; } .a .n { font-size: 15px; } .a .d { font-size: 12px; white-space: normal; line-height: 1.4; margin-top: 3px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+  .feed { grid-area: feed; border-left: 1px solid var(--line); border-right: 1px solid var(--line); padding: 0 0 30px; }
+  .feed .it { margin: 0; }
+  .feed .card { border: 0; border-bottom: 1px solid var(--line); border-radius: 0; padding: 14px 18px; box-shadow: none; }
+  .feed .card.viral { background: var(--hl); box-shadow: 3px 0 0 var(--red) inset; }
+  .feed .ava { width: 40px; height: 40px; font-size: 16px; } .who { font-size: 15px; } .who span { font-size: 13.5px; }
+  .feed .body, .feed .meta, .feed .note, .feed .cm { margin-left: 48px; } .body { font-size: 15.5px; } .meta { font-size: 13px; gap: 28px; }
+  .feed .it.sys, .feed .it.act, .feed .it.noti, .feed .it.event { margin: 0; border-radius: 0; border-left: 0; border-bottom: 1px solid var(--line); padding: 11px 18px 11px 66px; text-align: left; font-size: 14px; }
+  .feed .it.event { border-left: 3px solid var(--gold); padding-left: 63px; }
+  .feed .it.turn { margin: 0; padding: 9px 0; background: var(--panel); border-bottom: 1px solid var(--line); } .it.turn::before { display: none; } .it.turn span { background: none; }
+  .right { display: block; grid-area: right; padding: 12px 6px 30px 24px; }
+  .box { border: 1px solid var(--line); border-radius: 16px; padding: 12px 16px 6px; margin-bottom: 16px; }
+  .box h4 { margin: 0 0 8px; font-size: 19px; font-weight: 800; }
+  .tr { padding: 8px 0; } .tr small { display: block; color: var(--muted); font-size: 12.5px; } .tr b { display: block; font-size: 15px; } .tr span { color: var(--muted); font-size: 12.5px; }
+  .rv { display: flex; align-items: center; gap: 10px; padding: 8px 0; min-width: 0; } .rv .ava { width: 38px; height: 38px; font-size: 15px; }
+  .rvn { flex: 1; min-width: 0; } .rvn b { display: block; font-size: 14.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .rvn span { display: block; color: var(--muted); font-size: 12.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .rv i { font-style: normal; font-family: var(--mono); font-size: 13.5px; font-weight: 600; flex: none; } .rv.you { border-top: 1px solid var(--line); margin-top: 4px; padding-top: 12px; }
+  .right .foot { text-align: left; padding: 0 6px; }
+  .mask { align-items: center; } .sheet { max-width: 520px; border-radius: 18px; border: 1px solid var(--line); padding: 22px 22px 20px; box-shadow: 0 20px 60px rgba(0,0,0,.25); }
+  .toast { bottom: 40px; }
+}
+
+</style>
+</head>
+<body>
+<div id="app"></div>
+<noscript>这个游戏需要开启 JavaScript。</noscript>
+<script>
+// X 起号模拟器：游戏逻辑（不依赖 DOM，可在 node 里跑自动试玩）
+// 数据表（NICHES / ORIGINS / TPL / HOTS / RIVALS / EVENTS / ENDINGS / ACHS）在 data-*.js 里。
+
+var CFG = {
+  TURNS: 23,
+  DPT: 4,         // 每回合代表几天
+  B0: 220,        // 零粉丝时的基础触达
+  kF: 0.8,        // 每个有效粉丝带来的触达
+  W_BASE: 0.07,   // 每回合账号权重自然增长
+  W_POST: 0.075,  // 每发一条帖子的权重增长（每回合最多算 4 条）
+  LIMIT_MUL: 0.3, // 限流时的触达倍率
+  EVENT_P: 0.85,
+  CONV: 4.4
+};
+
+// 帖子类型：mul 内容倍率，conv 浏览转粉率，q 粉丝质量，vp 爆款概率，sd 运气方差
+var PT = {
+  short:  { n: '短评',   mul: 0.6, conv: 0.004,  q: 0.6,  vp: 0.03, sd: 0.9 },
+  hot:    { n: '蹭热点', mul: 0.9, conv: 0.004,  q: 0.45, vp: 0.07, sd: 1.3 },
+  tut:    { n: '教程',   mul: 2.7, conv: 0.0075, q: 0.9,  vp: 0.03, sd: 0.7 },
+  long:   { n: '长文',   mul: 5.2, conv: 0.0085, q: 0.95, vp: 0.05, sd: 0.8 },
+  video:  { n: '视频',   mul: 4.0, conv: 0.007,  q: 0.8,  vp: 0.06, sd: 0.9 },
+  gift:   { n: '福利',   mul: 1.6, conv: 0.0055, q: 0.25,  vp: 0.03, sd: 0.7 },
+  lottery:{ n: '抽奖',   mul: 3.2, conv: 0.022,  q: 0.12, vp: 0.02, sd: 0.5 },
+  repost: { n: '搬运',   mul: 1.3, conv: 0.0045, q: 0.5,  vp: 0.05, sd: 1.0 },
+  fight:  { n: '挂人',   mul: 3.0, conv: 0.005,  q: 0.4,  vp: 0.14, sd: 1.1 },
+  ad:     { n: '广告',   mul: 0.45, conv: 0.0006, q: 0.5,  vp: 0.004, sd: 0.6 }
+};
+
+// ---------- 随机数（状态存在 s.rs 里，存档可复现） ----------
+function rnd(s) {
+  s.rs = (s.rs + 0x6D2B79F5) | 0;
+  var t = Math.imul(s.rs ^ (s.rs >>> 15), 1 | s.rs);
+  t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+  return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+}
+function chance(s, p) { return rnd(s) < p; }
+function rint(s, a, b) { return a + Math.floor(rnd(s) * (b - a + 1)); }
+function pick(s, arr) { return arr[Math.floor(rnd(s) * arr.length)]; }
+function gauss(s) {
+  var u = 0; while (u === 0) u = rnd(s);
+  return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * rnd(s));
+}
+function clamp(x, a, b) { return Math.max(a, Math.min(b, x)); }
+function byId(arr, id) { for (var i = 0; i < arr.length; i++) if (arr[i].id === id) return arr[i]; return null; }
+function N(s, id) { return s.niche === id; }
+function realPct(s) { return s.F > 0 ? clamp(s.rF / s.F, 0, 1) : 1; }
+function fmt(n) {
+  n = Math.round(n);
+  if (n >= 100000000) return (n / 100000000).toFixed(1).replace(/\.0$/, '') + '亿';
+  if (n >= 10000) return (n / 10000).toFixed(n >= 100000 ? 0 : 1).replace(/\.0$/, '') + '万';
+  return String(n);
+}
+
+// ---------- 状态修改 ----------
+function addF(s, n, q) {
+  n = Math.round(n); if (n <= 0) return 0;
+  s.F += n; s.rF += n * (q == null ? 0.6 : q);
+  if (s.F > s.st.peak) s.st.peak = s.F;
+  return n;
+}
+function loseF(s, n) {
+  n = Math.min(Math.round(n), s.F); if (n <= 0) return 0;
+  var r = realPct(s);
+  s.F -= n; s.rF = Math.max(0, s.rF - n * r);
+  return n;
+}
+function loseFake(s, n) { // 只掉低质量粉
+  var fake = Math.max(0, s.F - s.rF);
+  n = Math.min(Math.round(n), Math.round(fake)); if (n <= 0) return 0;
+  s.F -= n; return n;
+}
+function fx(s, o) {
+  if (o.f) { if (o.f > 0) addF(s, o.f, o.q); else loseF(s, -o.f); }
+  if (o.fp) { var d = Math.round(s.F * o.fp); if (d >= 0) addF(s, d, o.q); else loseF(s, -d); }
+  if (o.mood) s.mood = clamp(s.mood + o.mood, 0, 100);
+  if (o.risk) {
+    s.risk = clamp(s.risk + o.risk, 0, 100);
+    if (o.risk > 0) { var k = o.rk || 'other'; s.riskBy[k] = (s.riskBy[k] || 0) + o.risk; s.riskyTurn = true; }
+  }
+  if (o.money) { s.money += o.money; if (o.money > 0) s.st.earned += o.money; }
+  if (o.rep) s.rep = clamp(s.rep + o.rep, 0, 100);
+  if (o.w) s.W = Math.max(0.6, s.W + o.w);
+  if (o.en) s.enNext += o.en;
+  if (o.flag) s.fl[o.flag] = s.turn;
+  if (o.end) endGame(s, o.end);
+}
+function has(s, flag) { return s.fl[flag] != null; }
+function since(s, flag) { return s.fl[flag] == null ? -1 : s.turn - s.fl[flag]; }
+function say(s, k, text, extra) {
+  var it = { k: k, t: text, turn: s.turn, id: ++s.fid };
+  if (extra) for (var key in extra) it[key] = extra[key];
+  s.feed.push(it);
+  if (s.feed.length > 80) s.feed.splice(0, s.feed.length - 80);
+  return it;
+}
+function endGame(s, id) { if (!s.ended) { s.ended = true; s.endId = id; } }
+
+// ---------- 开局 ----------
+function newGame(opt) {
+  var seed = (opt.seed == null ? Math.floor(Math.random() * 2147483647) : opt.seed) | 0;
+  var s = {
+    v: 1, seed: seed, rs: seed, turn: 1, phase: 'start',
+    niche: opt.niche, origin: opt.origin, name: opt.name || '',
+    F: 0, rF: 0, mood: 70, risk: 0, money: 300, rep: 50, W: 1,
+    enBase: 4, energy: 4, enNext: 0, income: 0, moodMul: 1,
+    riskBy: {}, riskyTurn: false, fl: {}, seen: {}, seenN: {}, c: {},
+    blue: 0, frozen: false, limited: false, exp: 0,
+    tp: [], feed: [], fid: 0, hot: null, ev: null, boughtThisTurn: false,
+    rv: {}, ended: false, endId: null,
+    st: { posts: 0, tutLong: 0, maxViews: 0, totalViews: 0, virals: 0, switches: 0, freezes: 0,
+          bigv: 0, earned: 0, peak: 0, blueTurns: 0, flops: 0, acts: 0, limitedTurns: 0, niches: [opt.niche] }
+  };
+  var o = byId(ORIGINS, opt.origin);
+  if (o && o.init) o.init(s);
+  RIVALS.forEach(function (r) {
+    s.rv[r.id] = { F: Math.round(r.f0 * (0.7 + rnd(s) * 0.6)), arcT: rint(s, 5, 21), done: false, gone: false };
+  });
+  say(s, 'sys', '账号注册成功。0 关注，0 粉丝。头像还是个灰色的蛋。');
+  return s;
+}
+
+// ---------- 回合开始 ----------
+function startTurn(s) {
+  s.phase = 'act';
+  s.tp = []; s.riskyTurn = false; s.boughtThisTurn = false; s.ev = null;
+  var en = s.enBase + s.enNext; s.enNext = 0;
+  s.notes = [];
+  if (s.mood < 30) { en -= 1; s.notes.push('心态太差，这几天提不起劲，精力 -1。'); }
+  var o = byId(ORIGINS, s.origin);
+  if (o && o.turn) o.turn(s, function (d) { en += d; });
+  s.energy = Math.max(1, en);
+  s.hot = HOTS[Math.floor(rnd(s) * HOTS.length)].id;
+  if (s.frozen) {
+    s.energy = 0; s.st.freezes++; s.ev = 'appeal';
+    say(s, 'sys', '你的账号已被冻结。原因：「违反了平台规则」。具体哪条，没说。');
+    return s;
+  }
+  if (s.turn >= 2 && chance(s, CFG.EVENT_P)) s.ev = pickEvent(s);
+  return s;
+}
+function eligible(s, e) {
+  if (e.special) return false;
+  if (s.seen[e.id] && !e.rep) return false;
+  if (e.min && s.turn < Math.round(e.min * 0.67)) return false;
+  if (e.max && s.turn > Math.round(e.max * 0.67)) return false;
+  if (e.if && !e.if(s)) return false;
+  return true;
+}
+function pickEvent(s) {
+  var pool = [], total = 0;
+  for (var i = 0; i < EVENTS.length; i++) {
+    var e = EVENTS[i];
+    if (!eligible(s, e)) continue;
+    var w = e.w || 1;
+    pool.push([e, w]); total += w;
+  }
+  if (!pool.length) return null;
+  var x = rnd(s) * total;
+  for (var j = 0; j < pool.length; j++) { x -= pool[j][1]; if (x <= 0) return pool[j][0].id; }
+  return pool[pool.length - 1][0].id;
+}
+function currentEvent(s) { return s.ev ? byId(EVENTS, s.ev) : null; }
+function eventText(s, e) { return typeof e.t === 'function' ? e.t(s) : e.t; }
+function eventOptions(s, e) {
+  return e.o.map(function (o, i) {
+    return { i: i, label: o[0], ok: o[2] ? !!o[2](s) : true, why: o[3] || '' };
+  });
+}
+function chooseEvent(s, idx) {
+  var e = currentEvent(s); if (!e) return '';
+  var o = e.o[idx]; if (!o) return '';
+  if (o[2] && !o[2](s)) return '';
+  s.seen[e.id] = (s.seen[e.id] || 0) + 1;
+  var res = o[1](s) || '';
+  if (e.id === 'appeal') s.frozen = false;
+  s.ev = null;
+  say(s, 'event', res, { title: e.title || '' });
+  checkInstant(s);
+  return res;
+}
+
+// ---------- 行动 ----------
+function mkText(s, type) {
+  var nc = byId(NICHES, s.niche);
+  var pool = (TPL[type] || TPL.short).slice();
+  var own = nc.tpl && nc.tpl[type]; if (own) pool = pool.concat(own, own);
+  var t = pick(s, pool);
+  var hot = byId(HOTS, s.hot);
+  return t.replace(/\{a\}/g, function () { return pick(s, nc.a); })
+          .replace(/\{b\}/g, function () { return pick(s, nc.b); })
+          .replace(/\{h\}/g, hot ? hot.n : '');
+}
+function post(s, type, extra) {
+  var p = { type: type, text: mkText(s, type), niche: s.niche };
+  if (extra) for (var k in extra) p[k] = extra[k];
+  s.tp.push(p);
+  var nc = byId(NICHES, s.niche);
+  if (nc.rp && type !== 'ad') fx(s, { risk: nc.rp, rk: nc.rk });
+  return p;
+}
+function cnt(s, id) { return s.c[id] || 0; }
+
+var ACTIONS = [
+  { id: 'short', n: '发短评', e: 1, d: '随手一句。浏览低，偶尔莫名其妙地爆。',
+    run: function (s) { post(s, 'short'); return pick(s, ['发了一条短评。', '打了一句话，删了，重打一遍，发了。', '蹲在马桶上发了一条。', '想了十分钟，发了十一个字。']); } },
+  { id: 'hot', n: '蹭热点', e: 1, d: '蹭对了起飞，蹭错了翻车。',
+    run: function (s) { post(s, 'hot'); return '蹭上了「' + byId(HOTS, s.hot).n + '」。'; } },
+  { id: 'tut', n: '写教程', e: 2, d: '浏览高且稳，来的都是真粉。',
+    run: function (s) { post(s, 'tut'); return pick(s, ['写了一篇教程，截了 9 张图。', '教程写完了。其中有两步你自己也是昨天刚学会的。', '写教程写到一半，发现自己之前一直做错了。改了，发了。']); } },
+  { id: 'long', n: '写长文', e: 3, d: '上限最高。也可能写三小时，三个赞。',
+    run: function (s) { post(s, 'long'); return pick(s, ['写完一篇长文，检查了四遍错别字。', '长文写了三个小时，其中两个小时在想标题。', '写了四千字。发出去之前删掉了最真诚的那一段。']); } },
+  { id: 'video', n: '做视频', e: 3, d: '浏览高。头几次大概率剪得很烂。',
+    run: function (s) { post(s, 'video', { nth: cnt(s, 'video') }); return pick(s, ['视频导出了三次才成功。', '录了十一遍，用的是第二遍。', '剪完视频，发现全程没开麦。重录。']); } },
+  { id: 'gift', n: '发福利', e: 1, d: '羊毛帖浏览高，来的人领完就走。',
+    run: function (s) { post(s, 'gift'); return pick(s, ['发了一条羊毛信息。', '把别人群里的羊毛转了出来，假装是自己发现的。']); } },
+  { id: 'repost', n: '搬运', e: 1, d: '别人的内容，你的数据。有风险。',
+    run: function (s) { post(s, 'repost'); fx(s, { risk: 7, rk: 'repost' }); return pick(s, ['搬了一条，顺手把水印裁了。', '搬了一条。翻译软件翻的，你润色了一个标点。', '搬了一条，在结尾加了一句「你怎么看」。']); } },
+  { id: 'replyv', n: '回复大V', e: 1, d: '在大V评论区抢前排。小概率被翻牌。',
+    run: function (s) {
+      var reach = reachOf(s) * 0.06 * Math.exp(gauss(s) * 0.8);
+      var g = addF(s, reach * 0.01 + rint(s, 0, 3), 0.6);
+      s.st.totalViews += Math.round(reach);
+      var r = rnd(s);
+      if (r < 0.045) {
+        var big = Math.round(200 + reachOf(s) * 0.5 * (0.5 + rnd(s)));
+        addF(s, big, 0.5); s.st.bigv++; fx(s, { mood: 12, flag: 'bigv' });
+        say(s, 'sys', '大V回复了你一个「哈哈哈」。你的通知栏炸了，涨粉 ' + fmt(big) + '。');
+        return '大V翻了你的牌。';
+      }
+      if (r < 0.075) { fx(s, { mood: -6 }); say(s, 'sys', '你发现自己被那个大V拉黑了。你回的是「说得对」。'); return '被拉黑了。'; }
+      return '抢到了第 ' + rint(s, 3, 60) + ' 楼，涨粉 ' + g + '。';
+    } },
+  { id: 'replyown', n: '回评论区', e: 1, d: '粉丝多了才有用。涨口碑，养铁粉。',
+    run: function (s) {
+      if (s.F < 200) { fx(s, { mood: -2 }); return '评论区只有一个卖币的机器人。你回了它。'; }
+      var conv = Math.min(s.F - s.rF, s.F * 0.012);
+      s.rF += Math.max(0, conv); fx(s, { rep: 3, mood: 2, w: 0.03 });
+      return '回了四十多条评论，有人说「博主居然回我了」。';
+    } },
+  { id: 'group', n: '进互推群', e: 1, d: '涨得快。来的人和你一样，只想涨粉。',
+    run: function (s) {
+      if (chance(s, 0.1)) { fx(s, { money: -50, mood: -4 }); return '群主收了 50 块入群费，然后把群解散了。'; }
+      var g = addF(s, (120 + s.F * 0.05) * (0.6 + rnd(s) * 0.8), 0.18);
+      fx(s, { risk: 4, rk: 'group' });
+      return '在群里接龙互关，涨粉 ' + fmt(g) + '。其中没有一个人会看你的帖子。';
+    } },
+  { id: 'buy', n: '买粉', e: 0, m: 150, d: '150 块。数字立刻好看，后果以后再说。',
+    ok: function (s) { return !s.boughtThisTurn; }, why: '这几天已经买过了',
+    run: function (s) {
+      s.boughtThisTurn = true;
+      var g = addF(s, Math.max(600, s.F * 0.2) * (0.8 + rnd(s) * 0.4), 0.02);
+      fx(s, { risk: 14, rk: 'buy', flag: 'bought' });
+      return '到账 ' + fmt(g) + ' 个粉丝，头像清一色是风景照。';
+    } },
+  { id: 'lottery', n: '抽奖', e: 1, m: 300, d: '300 块奖品。涨粉快，开奖后掉得也快。',
+    run: function (s) { post(s, 'lottery'); return '发了抽奖帖：关注加转发，抽一位送 300 块。'; } },
+  { id: 'blue', n: '开蓝标', e: 0, m: 80, d: '80 块管 7 回合。触达小幅提升。',
+    ok: function (s) { return s.blue <= 0; }, why: '蓝标还没到期',
+    run: function (s) { s.blue = 7; fx(s, { flag: 'blue' }); return '你有蓝标了。感觉自己说话都硬气了一点。'; } },
+  { id: 'fight', n: '挂人吵架', e: 1, d: '流量来得最快的办法。代价也来得快。',
+    run: function (s) {
+      post(s, 'fight'); fx(s, { risk: 8, rk: 'fight', rep: -3, mood: rint(s, -8, 6) });
+      if (chance(s, 0.14)) { fx(s, { mood: -12, fp: -0.03 }); return '你挂的那个人粉丝是你的二十倍。他的粉丝来了。'; }
+      return '你截图挂了一个人，配文「大家评评理」。';
+    } },
+  { id: 'sell', n: '带货', e: 1, d: '需要 800 粉。挂个链接，赚点佣金。',
+    ok: function (s) { return s.F >= 800; }, why: '粉丝不到 800',
+    run: function (s) {
+      var nc = byId(NICHES, s.niche);
+      var m = Math.round(s.rF * 0.012 * nc.monet * Math.exp(gauss(s) * 0.7)) + rint(s, 0, 20);
+      post(s, 'ad'); fx(s, { money: m, rep: -2 });
+      return '挂了个链接，佣金到账 ' + m + ' 块。';
+    } },
+  { id: 'ad', n: '接广告', e: 1, d: '需要 2000 粉。按粉丝数报价，掉口碑。',
+    ok: function (s) { return s.F >= 2000; }, why: '粉丝不到 2000',
+    run: function (s) {
+      var nc = byId(NICHES, s.niche);
+      var m = Math.round(60 + s.F * 0.025 * nc.monet * (0.6 + rnd(s) * 0.8));
+      post(s, 'ad'); fx(s, { money: m, rep: -4 });
+      return '接了一条广告，' + m + ' 块。甲方让你把「广告」两个字写小一点。';
+    } },
+  { id: 'course', n: '卖课', e: 1, d: '需要 5000 粉。来钱最快，口碑掉得也最快。',
+    ok: function (s) { return s.F >= 5000; }, why: '粉丝不到 5000',
+    run: function (s) {
+      var nc = byId(NICHES, s.niche);
+      var m = Math.round(s.F * 0.22 * nc.monet * (0.3 + rnd(s) * 1.2));
+      post(s, 'ad'); fx(s, { money: m, rep: -12, risk: 5, rk: 'course', flag: 'course' });
+      return '《从 0 到 1 起号实战营》开售，收款 ' + fmt(m) + ' 块。你自己起号才 ' + s.turn * CFG.DPT + ' 天。';
+    } },
+  { id: 'switch', n: '换赛道', e: 2, d: '掉一批粉，换一种活法。', param: 'niche',
+    run: function (s, to) {
+      if (!to || to === s.niche || !byId(NICHES, to)) return null;
+      var lost = loseF(s, s.F * 0.15);
+      s.niche = to; s.st.switches++; fx(s, { w: -0.25 });
+      if (s.st.niches.indexOf(to) < 0) s.st.niches.push(to);
+      return '改了简介和头像，现在是「' + byId(NICHES, to).n + '」博主。掉粉 ' + fmt(lost) + '。';
+    } },
+  { id: 'rest', n: '休息', e: 1, d: '放下手机。回心态，降一点风险。',
+    run: function (s) { fx(s, { mood: 14, risk: -3 }); return pick(s, ['你把手机放在客厅，去睡了一觉。', '出门走了走，发现外面的人都不认识什么大V。', '一整天没打开 X。也没发生什么。']); } }
+];
+
+function actionList(s) {
+  return ACTIONS.map(function (a) {
+    var ok = true, why = '';
+    if (s.ended || s.phase !== 'act') { ok = false; }
+    else if (a.e > s.energy) { ok = false; why = '精力不够'; }
+    else if (a.m && s.money < a.m) { ok = false; why = '钱不够'; }
+    else if (a.ok && !a.ok(s)) { ok = false; why = a.why || ''; }
+    return { id: a.id, n: a.n, e: a.e, m: a.m || 0, d: a.d, ok: ok, why: why, param: a.param || null };
+  });
+}
+function act(s, id, param) {
+  var a = byId(ACTIONS, id);
+  if (!a || s.ended || s.phase !== 'act') return null;
+  if (a.e > s.energy || (a.m && s.money < a.m) || (a.ok && !a.ok(s))) return null;
+  var msg = a.run(s, param);
+  if (msg == null) return null;
+  s.energy -= a.e; if (a.m) s.money -= a.m;
+  s.c[id] = cnt(s, id) + 1; s.st.acts++;
+  checkInstant(s);
+  return msg;
+}
+
+// ---------- 结算 ----------
+function reachOf(s) {
+  var r = CFG.B0 * s.W * s.W + s.rF * CFG.kF;
+  if (s.blue > 0) r *= 1.2;
+  if (s.risk >= 50) r *= CFG.LIMIT_MUL;
+  return r;
+}
+function settlePost(s, p, n) {
+  var t = PT[p.type], nc = byId(NICHES, p.niche), hot = byId(HOTS, s.hot);
+  var mul = t.mul * nc.vm, note = '';
+  var luck = Math.exp(gauss(s) * t.sd - t.sd * t.sd / 2);
+  if (p.type === 'hot') {
+    var match = hot.tags.indexOf(p.niche) >= 0;
+    mul *= match ? 1.9 : 0.7;
+    if (hot.toxic && chance(s, 0.3)) {
+      p.crash = true; mul *= 2.2; fx(s, { rep: -8, mood: -8, risk: 5, rk: 'fight' });
+      note = '这个热点反转了。你的帖子被截图传了一圈，配文「又一个」。';
+    } else if (!match) note = '这个热点和你的赛道没什么关系，粉丝没看懂你在说什么。';
+  }
+  if (p.type === 'long' && chance(s, 0.3)) { mul *= 0.06; p.flop = true; s.st.flops++; note = '写了三个小时。没有人看完第二段。'; }
+  if (p.type === 'video' && (p.nth || 0) < 2 && chance(s, 0.45)) { mul *= 0.25; p.flop = true; note = '字幕和声音对不上，评论区第一条是「？」。'; }
+  s.recent = s.recent || []; var same = s.recent.filter(function (x) { return x === p.type; }).length;
+  s.recent.push(p.type); if (s.recent.length > 8) s.recent.shift();
+  if (same >= 6 && p.type !== 'ad') { mul *= 0.65; if (!note) note = '你最近发的全是同一种东西，粉丝开始直接划走了。'; }
+  var viral = chance(s, t.vp);
+  if (viral && !p.flop) { luck = Math.max(luck, 1) * (7 + rnd(s) * 26); p.viral = true; s.st.virals++; }
+  var dil = Math.pow(0.93, Math.max(0, n - 3));
+  var views = Math.round(reachOf(s) * mul * luck * dil) + rint(s, 3, 40);
+  var q = (p.viral ? Math.min(t.q, 0.22) : t.q) * (nc.nq || 1); // 爆款带来的多是路人粉
+  var gain = views * t.conv * CFG.CONV * nc.grow * (0.6 + s.rep / 125);
+  if (p.viral) gain *= 0.75;
+  gain = addF(s, gain, q);
+  p.views = views; p.gain = gain;
+  p.likes = Math.round(views * (0.008 + rnd(s) * 0.022));
+  p.rt = Math.round(p.likes * (0.03 + rnd(s) * 0.15));
+  p.note = note;
+  s.st.posts++; s.st.totalViews += views;
+  if (p.type === 'tut' || p.type === 'long') s.st.tutLong++;
+  if (views > s.st.maxViews) { s.st.maxViews = views; s.st.maxText = p.text; }
+  // 心态：和自己的预期比
+  if (s.exp > 0 && p.type !== 'ad') {
+    if (p.viral) fx(s, { mood: 12 });
+    else if (views > s.exp * 1.6) fx(s, { mood: 4 });
+    else if (views < s.exp * 0.3) fx(s, { mood: Math.round((p.type === 'long' || p.type === 'video' ? -6 : -3) * s.moodMul) });
+  }
+  if (p.type !== 'ad') s.exp = s.exp ? s.exp * 0.75 + views * 0.25 : views;
+  if (p.viral) s.fl.viral = s.turn;
+  if (p.type === 'lottery') s.fl.lottery = s.turn;
+  p.cm = mkComments(s, p);
+  say(s, 'post', p.text, { p: p });
+  return p;
+}
+function mkComments(s, p) {
+  var out = [], used = {};
+  function add(pool) {
+    if (!pool || !pool.length) return;
+    var t = pick(s, pool); if (used[t]) return; used[t] = 1;
+    out.push({ n: pick(s, COMMENTERS), t: t });
+  }
+  if (p.flop || p.views < 150) { add(CM.flop); return out; }
+  if (p.viral) { add(CM.viral); add(CM.viral); }
+  var r = rnd(s);
+  if (r < 0.42) add(CM[p.type] || CM.any);
+  else if (r < 0.66) add(CM['n_' + p.niche] || CM.any);
+  else add(CM.any);
+  return out;
+}
+function endTurn(s) {
+  if (s.ended || s.phase !== 'act') return null;
+  var F0 = s.F, mood0 = s.mood, money0 = s.money;
+  var sum = { posts: [], notes: [], turn: s.turn };
+  var n = s.tp.length;
+  for (var i = 0; i < n; i++) sum.posts.push(settlePost(s, s.tp[i], n));
+  // 账号权重
+  if (n === 0) s.W = Math.max(1, s.W - 0.04);
+  else s.W += CFG.W_BASE + CFG.W_POST * Math.min(n, 4);
+  // 自然掉粉：低质量粉掉得快
+  var fake = Math.max(0, s.F - s.rF);
+  var lostFake = Math.round(fake * 0.07), lostReal = Math.round(s.rF * 0.004);
+  s.F = Math.max(0, s.F - lostFake - lostReal); s.rF = Math.max(0, s.rF - lostReal);
+  if (has(s, 'lottery') && since(s, 'lottery') === 1) {
+    var l = loseFake(s, fake * 0.3);
+    if (l > 0) sum.notes.push('抽奖开奖了。没中的人取关了，掉粉 ' + fmt(l) + '。');
+  }
+  // 收支
+  if (s.income) { s.money += s.income; if (s.income > 0) s.st.earned += 0; }
+  if (s.blue > 0) { s.blue--; s.st.blueTurns++; if (s.blue === 0) sum.notes.push('蓝标到期了。'); }
+  var ncT = byId(NICHES, s.niche); if (ncT.moodT && n > 0) fx(s, { mood: ncT.moodT });
+  // 倦怠
+  if (s.turn > 7) fx(s, { mood: -1 });
+  if (s.turn > 14) fx(s, { mood: -1 });
+  // 风险
+  s.risk = Math.max(0, s.risk - (s.riskyTurn ? 3 : 7));
+  var wasLimited = s.limited; s.limited = s.risk >= 50;
+  if (s.limited) s.st.limitedTurns++;
+  if (s.limited && !wasLimited) sum.notes.push('这几天的数据有点怪。你发帖问「我是不是被限流了」，这条帖子的浏览是 11。');
+  if (s.risk >= 100 || (s.risk >= 90 && chance(s, 0.4))) { banNow(s); }
+  else if (s.risk >= 75 && chance(s, 0.3)) { s.frozen = true; }
+  // 同行
+  rivalsTurn(s);
+  if (chance(s, 0.6)) { var nt = pick(s, NOTIFS); if (!s.seenN[nt]) { s.seenN[nt] = 1; say(s, 'noti', nt); } }
+  // 出局检查
+  checkInstant(s);
+  sum.dF = s.F - F0; sum.dMood = s.mood - mood0; sum.dMoney = s.money - money0;
+  s.last = { dF: sum.dF, dMood: sum.dMood, dMoney: sum.dMoney };
+  if (!s.ended) {
+    if (s.turn >= CFG.TURNS) { s.ended = true; s.endId = finalEnding(s); }
+    else { s.turn++; s.phase = 'start'; }
+  }
+  if (s.ended) s.phase = 'end';
+  return sum;
+}
+function banNow(s) {
+  var best = 'other', bv = 0;
+  for (var k in s.riskBy) if (s.riskBy[k] > bv) { bv = s.riskBy[k]; best = k; }
+  var map = { buy: 'ban_buy', group: 'ban_buy', repost: 'ban_repost', lewd: 'ban_lewd', shill: 'ban_shill', course: 'ban_shill', fight: 'ban_fight' };
+  endGame(s, map[best] || 'ban_other');
+}
+function checkInstant(s) {
+  if (s.ended) return;
+  if (s.mood <= 0) endGame(s, 'quit');
+  else if (s.money <= -2000) endGame(s, 'broke');
+  if (s.ended) s.phase = 'end';
+}
+function finalEnding(s) {
+  for (var i = 0; i < ENDINGS.length; i++) {
+    var e = ENDINGS[i];
+    if (e.when && e.when(s)) return e.id;
+  }
+  return 'air';
+}
+function rivalsTurn(s) {
+  RIVALS.forEach(function (r) {
+    var st = s.rv[r.id]; if (st.gone) return;
+    st.F = Math.round(st.F * (1 + r.g * (0.4 + rnd(s) * 1.2)));
+    if (!st.done && s.turn === st.arcT) {
+      st.done = true;
+      if (r.arc === 'rise') st.F = Math.round(st.F * (5 + rnd(s) * 9));
+      else if (r.arc === 'crash') st.F = Math.round(st.F * 0.35);
+      else if (r.arc === 'quit') st.gone = true;
+      if (r.arcLine) say(s, 'rival', r.arcLine, { rid: r.id, rF: st.F, arc: r.arc });
+    }
+  });
+  var alive = RIVALS.filter(function (r) { return !s.rv[r.id].gone; });
+  if (alive.length) {
+    var r1 = pick(s, alive);
+    say(s, 'rival', pick(s, r1.lines), { rid: r1.id, rF: s.rv[r1.id].F,
+      views: Math.round(s.rv[r1.id].F * (0.2 + rnd(s) * 1.5)) });
+  }
+}
+
+// ---------- 结局与成就 ----------
+function endingOf(s) { return byId(ENDINGS, s.endId) || byId(ENDINGS, 'air'); }
+function endingText(s) { var e = endingOf(s); return typeof e.d === 'function' ? e.d(s) : e.d; }
+function achsOf(s) { return ACHS.filter(function (a) { try { return a.when(s); } catch (e) { return false; } }).map(function (a) { return a.id; }); }
+function healthLabel(s) {
+  if (s.risk < 25) return '良好';
+  if (s.risk < 50) return '有点悬';
+  if (s.risk < 75) return '数据怪怪的';
+  return '被盯上了';
+}
+function days(s) { return Math.min(CFG.TURNS * CFG.DPT, s.turn * CFG.DPT); }
+
+var Game = {
+  CFG: CFG, PT: PT, ACTIONS: ACTIONS,
+  newGame: newGame, startTurn: startTurn, currentEvent: currentEvent, eventText: eventText,
+  eventOptions: eventOptions, chooseEvent: chooseEvent, actionList: actionList, act: act,
+  endTurn: endTurn, endingOf: endingOf, endingText: endingText, achsOf: achsOf,
+  healthLabel: healthLabel, realPct: realPct, reachOf: reachOf, fmt: fmt, days: days, byId: byId
+};
+if (typeof module !== 'undefined') module.exports = Game;
+
+// 赛道、出身、帖子模板、热点、同行。全部虚构。
+
+var NICHES = [
+  { id: 'ai', n: 'AI 工具', d: '人多，卷，但一直有新东西可写。', vm: 1.0, grow: 1.0, monet: 1.0,
+    a: ['Agent', '提示词', 'AI 写代码', '大模型降价', 'AI 搜索', '本地部署', 'AI 做视频', '套壳产品', 'AI 日报'],
+    b: ['九成的 AI 教程是另一个 AI 写的', '你收藏的工具合集一个都没打开过', '套壳不丢人，丢人的是套了还收 199', '现在发 AI 日报的人比看的人多', '提示词写得再长，它还是会说「当然可以」', '每个月都有人宣布程序员完了，程序员还在加班'],
+    tpl: { short: ['又一个「颠覆行业」的模型发布了。上一个被颠覆的行业还在排队。', '我的提示词越写越长，它的回答越来越像我领导。', 'AI 日报我已经不看了，现在只看 AI 帮我总结的 AI 日报。'],
+           tut: ['一条提示词，让 AI 的输出不再有 AI 味。这句话本身是 AI 写的。'] } },
+  { id: 'money', n: '搞钱干货', d: '受众最广。教别人赚钱是最稳的赚钱方式。', vm: 1.05, grow: 1.05, monet: 1.4,
+    a: ['副业', '一人公司', '信息差', '出海', '被动收入', '知识付费', '二手倒卖', '个人品牌', '自由职业'],
+    b: ['教你搞钱的人，主要靠教你搞钱来搞钱', '月入三万的截图，有一半是同一张', '所谓信息差，就是他比你早看到那条推', '被动收入需要非常主动地发帖', '闭环的意思是我的课教你卖课', '自由职业自由的是甲方'],
+    tpl: { short: ['月入三万的方法我没有，月入三万的截图我可以教你做。', '副业做到第三个月，主业开始像副业了。收入没有。', '一人公司最大的好处是开会很快，最大的坏处是锅也只有一个人背。'] } },
+  { id: 'coin', n: '币圈喊单', d: '涨粉快，变现猛。平台和粉丝迟早有一个找你算账。', vm: 1.1, grow: 1.1, monet: 2.2, rp: 2.6, rk: 'shill',
+    a: ['土狗', '空投', '合约', '牛市', '撸毛', '百倍币', '链上数据', '交易所', '新项目'],
+    b: ['这波我不看图，我看信仰', '老师的止损线画在你的本金上', '撸毛的尽头是被反撸', '喊单的人自己只买现货', '回本了就走，这句话我说了四年', '牛市里人人都是分析师'],
+    tpl: { short: ['这个位置不上车，回头别拍大腿。上次我这么说的时候，价格在上面一千点。', '各位，格局。', '纯分享，非投资建议。我梭了。', '凌晨四点还在看盘的举个手。我先举。'],
+           gift: ['新项目空投查询开了，撸过的去看看。我领到了 3.2 块。'] } },
+  { id: 'lewd', n: '擦边', d: '涨粉最快。来的人不看字，平台看得很仔细。', vm: 1.7, grow: 1.6, monet: 0.7, rp: 3.2, rk: 'lewd', nq: 0.45,
+    a: ['自拍', '新衣服', '健身照', '深夜福利', '泳装', '镜子', '角色扮演', '居家日常'],
+    b: ['今天穿这件出门会不会太过分', '评论区的各位晚上好', '主页置顶有惊喜', '这张差点没过审', '刚洗完头', '点赞过千发下一张'],
+    tpl: { short: ['今天的穿搭。（1 图）', '有人在吗', '镜子该擦了。重点不是镜子。', '睡不着，发张图。', '这张滤镜开大了，将就看。'] } },
+  { id: 'repost', n: '搬运', d: '不用创作。只要原作者不上 X，你就是原作者。', vm: 1.2, grow: 0.9, monet: 0.6, rp: 2.2, rk: 'repost', nq: 0.7,
+    a: ['外网神帖', '外网热门视频', '老外吵架', '海外梗图', '英文长文', '播客金句', '大佬访谈', '外网段子'],
+    b: ['翻译了一下，仅供参考', '原帖找不到了', '看到一张图，笑了一下午', '这段话值得反复看', '机翻的，意思到了就行', '侵删，但请先私信'],
+    tpl: { short: ['来源：网络。', '这图不是我做的，但是我先发的。', '原作者要是看到了私信我，我给你加个名字。'] } },
+  { id: 'soup', n: '情感鸡汤', d: '凌晨发帖效果最好。写的人和看的人都没睡。', vm: 1.15, grow: 1.0, monet: 0.8, nq: 0.8,
+    a: ['前任', '原生家庭', '断舍离', '成年人的崩溃', '内耗', '相亲', '同学聚会', '三十岁', '独居'],
+    b: ['真正要走的人不会发动态', '你不是懒，你是累了', '成年人的体面是不追问', '有些人只适合留在备注里', '不回消息也是一种回答', '长大就是学会把话咽回去'],
+    tpl: { short: ['你不是没人爱，你只是不回消息。', '成年人的崩溃是静音的。发推除外。', '凌晨还醒着的人，都有一个不想结束的今天。', '有些话我只说给懂的人听。所以公开发了。'] } },
+  { id: 'shop', n: '带货测评', d: '涨粉慢，但每个粉丝都带着钱包来。', vm: 0.9, grow: 0.85, monet: 1.8,
+    a: ['充电宝', '机械键盘', '人体工学椅', '显示器', '扫地机器人', '降噪耳机', '咖啡机', '露营装备', '手机壳'],
+    b: ['这个价位闭眼入', '用了三个月，说点真话', '厂家没给钱，但我希望他们给', '平替和正品我都买了', '参数党可以直接看第三张图', '退货的时候才发现包装是真不错'],
+    tpl: { short: ['这个价位闭眼入。睁着眼的话，还是再看看。', '用了三个月，说点真话：盒子挺好看的。', '没有广告，是真的好用。当然，这句话证明不了没有广告。'] } },
+  { id: 'life', n: '生活碎片', d: '最安全，最开心，最不涨粉。', vm: 0.55, grow: 0.6, monet: 0.3, moodT: 2,
+    a: ['通勤', '楼下的猫', '外卖', '加班', '房东', '周末', '健身房', '做饭', '晚霞'],
+    b: ['今天的晚霞不错', '又是不想上班的一天', '楼下的猫又胖了', '外卖涨了两块', '房东说下个月要来看看房子', '办了健身卡，去了一次'],
+    tpl: { short: ['楼下的猫今天没来。', '今天的晚霞。（没拍下来）', '又是不想上班的一天。去了。', '外卖又涨了两块，我的工资以不变应万变。', '泡面忘了放调料包，吃到一半才发现。'] } }
+];
+
+var ORIGINS = [
+  { id: 'nobody', n: '纯素人', d: '没有粉丝，没有资源，也没有包袱。',
+    init: function (s) { s.money = 300; s.mood = 75; } },
+  { id: 'mover', n: '搬家户', d: '在别的平台有两万粉，以为到这也一样。开局 600 粉，但心态掉得快。',
+    init: function (s) { addF(s, 600, 0.7); s.mood = 60; s.moodMul = 1.6; s.exp = 2500; } },
+  { id: 'refugee', n: '封号难民', d: '上一个平台把你封了，原因至今不明。懂规矩，但档案不干净。',
+    init: function (s) { s.risk = 12; s.riskBy.other = 12; s.fl.refugee = 0; s.mood = 62; s.W = 1.15; } },
+  { id: 'worker', n: '上班族', d: '有工资，没时间。每回合进账 350，但经常加班。',
+    init: function (s) { s.money = 2500; s.income = 350; },
+    turn: function (s, addEn) { if (chance(s, 0.22)) { addEn(-1); s.notes.push('这几天加班，精力 -1。'); } } },
+  { id: 'jobless', n: '失业者', d: '时间全是你的，每回合 5 点精力。存款每回合少 70。',
+    init: function (s) { s.enBase = 5; s.money = 600; s.income = -70; s.mood = 58; } }
+];
+
+var TPL = {
+  short: ['{b}。', '说个得罪人的：{b}。', '关于{a}，我只有一个字：别。', '不是，{a}现在都卷成这样了吗', '睡不着。{b}。',
+    '刚刷到有人说{a}过时了。他上个月还在卖{a}的课。', '{a}这个东西，我研究了三天，结论是再研究三天。',
+    '有没有人和我一样，一看到{a}就想划走', '暴论：{b}。不接受反驳，因为我要睡了。', '今天又有人问我{a}怎么入门。我也想知道。',
+    '{a}，懂的都懂。不懂的我也讲不清。', '看了一圈{a}的讨论，最大的收获是知道了该拉黑谁。', '{b}。这话我先放这儿。'],
+  hot: ['「{h}」这事，我从{a}的角度说两句。', '所有人都在聊「{h}」，那我也聊。其实我没看全。', '「{h}」给做{a}的人提了个醒：{b}。',
+    '趁「{h}」还热，说个没人提的角度。', '关于「{h}」，我的看法可能和大家不太一样。（其实一样）', '「{h}」上热搜了。先占个位，想到说什么再编辑。',
+    '别人看「{h}」看的是热闹，我看到的是{a}。', '「{h}」这件事里最离谱的不是事件本身，是评论区。', '三句话讲清「{h}」。第一句我还在想。',
+    '如果你今天只看一条关于「{h}」的帖子，那大概也不会是这条。', '「{h}」和{a}其实是一回事，听我硬讲。', '「{h}」。不评价，纯记录。（配图九张）'],
+  tut: ['{a}从零上手，我踩过的坑都写在这了。一共 9 条，建议先收藏。', '花两周整理的{a}入门清单。收藏了就等于学会了。', '{a}保姆级流程，照着点就行，点错了不怪我。',
+    '很多人问{a}到底怎么弄，统一回复，附截图 12 张。', '{a}最容易错的 5 个地方，第 3 个我上周刚犯。', '不卖课，{a}的全部步骤一条帖子讲完。',
+    '写给完全没碰过{a}的人。老手可以划走，顺便点个赞。', '{a}避坑：这 4 种情况不要碰，我替你试过了。', '整理了一份{a}对照表，免费，不用私信，图在下面。',
+    '{a}我是这么做的，分 7 步，每步配了图。', '一条帖子带你搞定{a}。写完发现一条写不下，见评论区。', '被问了八百遍的{a}，今天写个完整版，以后直接甩链接。'],
+  long: ['【长文】做了三个月{a}，我想明白的几件事', '【长文】{a}的真相：{b}', '【长文】从头讲一遍{a}，五千字，能看完的都是真爱',
+    '【长文】我为什么不再相信「{a}」这套说法', '【长文】复盘：我在{a}上亏掉的时间和钱', '【长文】{b}。这篇我写了一个通宵。',
+    '【长文】{a}完全指南（2026 版），目录在第一段', '【长文】一个普通人做{a}的 92 天记录', '【长文】关于{a}，教程不会告诉你的那部分',
+    '【长文】把{a}拆开来看，其实只有三个变量', '【长文】给一年前的自己写的{a}说明书', '【长文】{a}这一行，谁在赚钱，赚的是谁的钱'],
+  video: ['【视频】3 分钟看懂{a}，全程无废话（有一点）', '【视频】实录：我折腾了一整天{a}', '【视频】{a}上手演示。没剪辑，因为不会。',
+    '【视频】{b}。不信看视频。', '【视频】第一次录屏讲{a}，声音有点小，请戴耳机', '【视频】{a}前后对比，重点在最后 10 秒',
+    '【视频】带你走一遍{a}的完整流程，建议倍速', '【视频】测了 5 种{a}的做法，只有一种能用', '【视频】一镜到底：{a}到底行不行',
+    '【视频】被问爆了的{a}，录了个屏', '【视频】{a}翻车现场。本来想剪掉的。', '【视频】60 秒，{a}，看完就会'],
+  gift: ['{a}相关的免费额度，今天还能领，手慢无。', '发现一个{a}的羊毛，亲测可用，链接在评论区。', '这个{a}会员现在白送三个月，别问我怎么知道的。',
+    '整理了 10 个{a}免费资源，转发的人今年发财。', '刚看到的{a}福利，不知道什么时候下线，先发了。', '限时：{a}内测名额，我这有 20 个邀请码。',
+    '{a}的隐藏优惠，客服都不一定知道。', '薅到一个{a}的大毛，趁还没修复。', '有人需要{a}兑换码吗，评论区扣 1。',
+    '今日羊毛：{a}。昨天那个已经没了，别问了。', '这个{a}活动能叠三层优惠，算了一下约等于不要钱。', '{a}免费领的方法，三步，第三步需要一点运气。'],
+  lottery: ['关注加转发，抽一位送 300 块红包，三天后开奖。真的会开。', '感谢支持，抽一个人清空购物车（300 以内）。', '粉丝福利：转发这条，抽一位送 300 块的{a}周边。',
+    '没什么理由，就是想抽奖。关注转发，300 块。', '号做到今天不容易，抽个奖庆祝，奖品 300 块现金。', '转发抽奖：一位，300 块。上次没开奖的不是我，是另一个号。',
+    '抽 300 块。条件：关注、转发、评论区夸我一句。', '听说抽奖涨粉快。那么，抽奖。300 块。', '抽一位幸运粉丝，奖品是我这个月的饭钱（300 块）。',
+    '转发这条，抽一位送 300。平台工具开奖，公平公正。', '开个奖池：300 块，每多一千转发加 0 块。', '想要 300 块吗？关注转发即可。不想要也可以转。'],
+  repost: ['外网一个关于{a}的神帖，翻译了一下。', '老外是这么看{a}的，看完沉默了。', '这段{a}视频在外网一千万播放了，搬来给大家看看。',
+    '看到一张{a}的图，笑了一下午。来源不详。', '国外大佬讲{a}的 20 条经验。我只翻了前 8 条，后面太长。', '外网高赞：{b}。',
+    '转自群聊：{b}。', '一个老外靠{a}赚到第一桶金的全过程（机翻润色）。', '这条{a}的帖子在外面吵翻了，搬过来大家评评。',
+    '外网一个讲{a}的视频，重点我帮大家截出来了。', '海外网友总结的{a}清单，侵删。', '原帖被删了，还好我存了图。'],
+  fight: ['有些做{a}的同行，吃相能不能别这么难看。截图为证。', '挂个人。此人私信骂我不懂{a}，聊天记录如下。', '某十万粉博主讲{a}，全篇照搬，对比图我做好了。',
+    '本来不想说的。但这位讲{a}的老师，你删我评论是什么意思？', '大家评评理，这算不算抄我的{a}帖子。', '有人说我的{a}内容是洗稿。来，时间线摆出来。',
+    '点名批评最近那批{a}账号，你们心里清楚是谁。', '刚被一个{a}博主拉黑了，原因是我问他数据哪来的。', '{b}。说的就是你，别装没看见。',
+    '今天这个{a}的瓜，我来捋一下时间线（1/14）。', '不吐不快：某些人卖{a}的课，自己的号是买的。', '回应一下某人的阴阳怪气。本帖不删。'],
+  ad: ['最近一直在用的{a}工具，体验确实不错。（合作）', '很多人问我{a}用什么，就是这个。链接在下面。', '朋友做的{a}产品，帮忙推一下。是真朋友。',
+    '这个{a}课程我自己也报了。#广告', '今天不聊别的，推荐一个{a}相关的好东西。', '用了一周，客观说几句这个{a}产品。（甲方看过稿了）',
+    '{a}人必备，现在下单有优惠，专属口令是我的名字。', '恰个饭。{a}相关的，品质我把过关。', '这条是广告。但是是和{a}有关的良心广告。',
+    '老粉都知道我很少接推广，这次的{a}是例外。上次也是。', '评论区很多人问链接，放这了。', '合作推广：{a}。字数要求 100 字，现在是第 31 个字。']
+};
+
+var HOTS = [
+  { id: 'h1', n: '某大厂深夜发布新模型', tags: ['ai', 'money'] },
+  { id: 'h2', n: '顶流艺人塌房', tags: ['soup', 'life', 'repost'], toxic: true },
+  { id: 'h3', n: '某交易所暂停提币', tags: ['coin'], toxic: true },
+  { id: 'h4', n: '大饼一夜涨了 12%', tags: ['coin', 'money'] },
+  { id: 'h5', n: '知名搞钱博主卖课被扒', tags: ['money', 'soup'], toxic: true },
+  { id: 'h6', n: '全网都在晒 AI 头像', tags: ['ai', 'lewd', 'life'] },
+  { id: 'h7', n: '十年一遇的大雪', tags: ['life', 'soup'] },
+  { id: 'h8', n: '视频会员又涨价', tags: ['shop', 'life', 'money'] },
+  { id: 'h9', n: '某博主晒出年入千万的流水', tags: ['money', 'soup'], toxic: true },
+  { id: 'h10', n: '大促预售开启', tags: ['shop', 'money'] },
+  { id: 'h11', n: '年度旗舰手机发布会', tags: ['shop', 'ai'] },
+  { id: 'h12', n: '综艺嘉宾一句话惹争议', tags: ['soup', 'repost'], toxic: true },
+  { id: 'h13', n: '一张外网梗图刷屏', tags: ['repost', 'life'] },
+  { id: 'h14', n: '老外直播吵架的切片', tags: ['repost'] },
+  { id: 'h15', n: '热门游戏出了新皮肤', tags: ['lewd', 'shop'] },
+  { id: 'h16', n: '年度漫展开幕', tags: ['lewd', 'life'] },
+  { id: 'h17', n: '平台老板又发了一条怪话', tags: ['ai', 'repost', 'money'] },
+  { id: 'h18', n: '年终总结模板', tags: ['soup', 'money', 'life'] },
+  { id: 'h19', n: '某大厂裁员名单流出', tags: ['money', 'soup', 'ai'], toxic: true },
+  { id: 'h20', n: '一只会自己冲马桶的猫', tags: ['life', 'repost'] },
+  { id: 'h21', n: 'AI 写的歌冲上了榜单', tags: ['ai', 'repost'] },
+  { id: 'h22', n: '演唱会门票三秒售空', tags: ['life', 'soup'] },
+  { id: 'h23', n: '考研出分', tags: ['soup', 'life'] },
+  { id: 'h24', n: '奶茶联名周边被抢空', tags: ['shop', 'life', 'lewd'] },
+  { id: 'h25', n: '新项目空投查询开放', tags: ['coin'] },
+  { id: 'h26', n: '某项目方连夜跑路', tags: ['coin', 'money'], toxic: true },
+  { id: 'h27', n: '情人节', tags: ['soup', 'lewd', 'shop'] },
+  { id: 'h28', n: '一封程序员的辞职信', tags: ['ai', 'money', 'soup'] },
+  { id: 'h29', n: '测评博主被品牌起诉', tags: ['shop'], toxic: true },
+  { id: 'h30', n: '全网断舍离挑战', tags: ['soup', 'life', 'shop'] },
+  { id: 'h31', n: 'AI 助手把用户的数据库删了', tags: ['ai'] },
+  { id: 'h32', n: '健身博主体脂率造假', tags: ['lewd', 'shop'], toxic: true },
+  { id: 'h33', n: '外网万赞长文《三十岁以后》', tags: ['repost', 'soup'] },
+  { id: 'h34', n: '某平台大规模封号', tags: ['money', 'repost', 'lewd', 'coin'] }
+];
+
+var RIVALS = [
+  { id: 'liandan', n: '深夜炼丹师', bio: 'AI 工具｜每天测一个新模型', niche: 'ai', f0: 320, g: 0.12, arc: 'rise',
+    lines: ['新模型实测，结论放最后：还行。', '今天测了 6 个 AI 工具，5 个是同一个套壳。', '凌晨三点，模型终于跑通了。我没通。', '整理了一份提示词清单，评论区自取。', '有人问我为什么每天都发。因为每天都有新东西要测。'],
+    arcLine: '我那条模型横评被官方账号转了。一晚上涨了几万粉，手机烫得拿不住。' },
+  { id: 'ajie', n: '阿杰搞钱日记', bio: '95 后｜三年三套房（朋友的）', niche: 'money', f0: 900, g: 0.1, arc: 'crash',
+    lines: ['今天进账 4 位数。具体第一位是几不重要。', '普通人翻身只有三条路，都在我课里。', '认知决定收入。我的认知 1999 一份。', '又一个学员出结果了，截图见评论区。', '别人恐惧我贪婪。别人贪婪我也贪婪。'],
+    arcLine: '关于近期的退费争议，我回应一下：课程内容是完整交付的，赚不到钱属于执行问题。评论区已关闭。' },
+  { id: 'laozhou', n: '链上老周', bio: '2017 年入圈｜只说真话｜非投资建议', niche: 'coin', f0: 2200, g: 0.09, arc: 'quit',
+    lines: ['这个位置，我只说一次。', '昨天喊的那个，涨了的不用谢我，跌了的看我置顶的免责声明。', '牛还在。', '格局打开。这次不一样。', '老粉都知道，我从来不删帖。'],
+    arcLine: '（该账号已注销。最后一条帖子是「这次真的不一样」。）' },
+  { id: 'ruantang', n: '软糖酱', bio: '日常｜健身｜主页有惊喜', niche: 'lewd', f0: 1600, g: 0.19, arc: 'crash',
+    lines: ['今日份。（4 图）', '评论区的哥哥们晚上好呀。', '新买的衣服，会不会有点小。', '点赞过万发后续。', '最近好多高仿号，认准这个号哦。'],
+    arcLine: '大号没了。这是小号，大家重新关注一下。之前的会员群还在。' },
+  { id: 'bane', n: '搬砖的鹅', bio: '每日搬运外网好东西｜侵删', niche: 'repost', f0: 1200, g: 0.13, arc: 'rise',
+    lines: ['外网今日最佳，自己看。', '这条在外面已经两百万赞了。', '翻译：我。润色：也是我。原作者：不清楚。', '每日梗图 9 连。', '今天搬了 14 条，手有点酸。'],
+    arcLine: '粉丝破十万了。感谢外网的各位创作者，虽然你们不知道我。' },
+  { id: 'yidao', n: '温柔一刀', bio: '写给深夜的你', niche: 'soup', f0: 950, g: 0.1, arc: 'steady',
+    lines: ['你要习惯，很多话到了嘴边就不想说了。', '晚安，不被爱的人。', '有些人出现，就是为了给你上一课然后下课。', '别回头，回头也没人。', '今天也辛苦了。虽然我不知道你做了什么。'],
+    arcLine: '' },
+  { id: 'akai', n: '数码阿凯', bio: '自费测评｜不恰烂饭（看价格）', niche: 'shop', f0: 650, g: 0.08, arc: 'steady',
+    lines: ['这台我自己买的。发票在第二张图。', '厂商问我能不能把缺点写委婉一点。可以，加钱。', '千元档横评，结论是都差不多。', '用了半年的长测，就一句话：能用。', '有人说我收钱了。我也希望。'],
+    arcLine: '' },
+  { id: 'mao', n: '楼下那只猫', bio: '一只橘猫的日常', niche: 'life', f0: 60, g: 0.05, arc: 'rise',
+    lines: ['今天它在晒太阳。', '今天它没理我。', '今天它胖了一点。', '今天它抓了一只蟑螂，放在我门口。', '今天下雨，它在车底下。'],
+    arcLine: '它打哈欠的那张图被转了八十万次。我注册这个号的时候只是想存照片。' },
+  { id: 'jiucai', n: '早起的韭菜', bio: '记录我的翻身之路', niche: 'money', f0: 110, g: 0.06, arc: 'quit',
+    lines: ['Day 12：今天也没有赚到钱，但是学到了很多。', '买了第三门课，这次感觉对了。', '坚持日更的第 20 天，粉丝 114。', '今天把上个月学的东西整理成了笔记，然后忘了发。', '有没有一起起号的，互关一下。'],
+    arcLine: '停更说明：找到工作了。这个号留着，万一呢。' },
+  { id: 'pm', n: '不存在的产品经理', bio: '前大厂｜现自由｜AI 时代的思考者', niche: 'ai', f0: 520, g: 0.11, arc: 'crash',
+    lines: ['AI 时代，真正稀缺的是提出好问题的能力。', '今天和一位创始人聊了 3 小时，我的三点思考：', '所有产品都值得用 AI 重做一遍。包括这句话。', '我离开大厂的第 200 天，想明白了一件事。', '深度好文，建议反复阅读。作者是我。'],
+    arcLine: '有人扒出我的「三点思考」全是 AI 生成的。我想说，善用工具难道不正是 AI 时代的核心能力吗？' }
+];
+
+// 评论区和系统通知。全部虚构，负责好笑。
+
+var COMMENTERS = ['互关必回', '用户8848213', '芝士就是力量', '已读不回', '打工人小王', '收藏夹吃灰', '一只路过的鸽子', '韭菜本菜',
+  '凌晨三点的外卖', 'AI 味鉴定师', '前排卖瓜子', '你说得对但是', '刚醒', '蹲一个后续', '反对一切', 'momo', '主页有惊喜',
+  '币圈老师傅', '退堂鼓一级演奏家', '不想上班', '我先睡了', '人间清醒（自封）', '热心网友老李', '今天也没瘦'];
+
+var CM = {
+  any: ['已收藏。（此人收藏夹里有 4812 条未读）', '蹲', '马了', '太长不看，能总结一下吗（原文 38 个字）', '第一！（实际是第三）', '说得好。我选择不信。',
+    '博主头像哪里找的', '看完了，现在我有了新的焦虑', '已转发到家族群，被踢了', '我有不同意见，但我懒得打字', '学到了（指学会了打「学到了」三个字）',
+    '火钳刘明', '兄弟，互关吗', '你好，看看我主页', '不明觉厉，先赞为敬', '博主是不是在内涵我', '我室友让我问问这是真的吗', '看到这条的时候我正在拉屎，谢谢陪伴',
+    '同意楼上。楼上是谁不重要', '这条我上个月好像看过，也是你发的吗（不是）'],
+  flop: ['（评论区只有一个卖币的机器人：「说得好」）', '（唯一的赞来自你妈）', '（唯一的评论来自你的小号：「写得真好」）', '（没有评论。你自己把这条看了 14 遍）',
+    '（一个人点了赞，又取消了）', '（有人回了个「？」，然后把你取关了）', '（这条帖子的浏览量，约等于你刷新的次数）', '（评论区安静得能听见服务器的风扇声）'],
+  viral: ['怎么全网都在转这个', '是谁把这条推给我的，我明明不关注这些', '楼主火了，记得回来还愿', '看到这条的时候才 200 赞，现在我算老粉了',
+    '评论区吵到第四层了，我是来看吵架的', '营销号已经搬走了，速度比你回评论还快', '博主别飘，下一条就没人看了', '我朋友转给我的，他说「这不就是你」',
+    '火前留名。哦已经火了', '这条被我们公司群转了，老板说写得好，然后让我们加班', '半个时间线都在转，另外半个在骂', '恭喜博主，喜提高仿号三个'],
+  short: ['一句话就想骗我点赞？行吧', '字数比我的耐心还少', '你就不能多写两个字吗', '短小精悍，主要是短小', '这句话我要截图，然后不知道发给谁'],
+  hot: ['蹭得好生硬，我喜欢', '热点还没凉，你的角度先凉了', '这也能扯到一起？', '来晚了，这个瓜昨天就反转了', '你是今天第 400 个发这个的', '这个热点跟你有什么关系（没有，但他发了）'],
+  tut: ['收藏了。上一个收藏的教程是三年前的，还没打开', '第 3 步点不了，是我的问题吗（是）', '有没有视频版？有没有文字版？有没有人替我学',
+    '感谢分享，已转给需要的人（他也不会看）', '照着做了，电脑蓝屏了，但我觉得不怪你', '求链接。（原文第一行就是链接）', '好教程，下次别发了，同行都学会了',
+    '看完了，感觉我会了。关掉页面，感觉我又不会了', '请问零基础能学吗？请问有手就行吗？请问没手呢'],
+  long: ['太长了，我让 AI 总结成三句话，三句话我也没看完', '看到第二段，先点个赞表示尊重', '写得好，就是有点费流量', '全文最有用的部分是目录',
+    '建议拆成 20 条发，这样我可以每条都不看', '认真看完了。我是说标题', '这么长，一定很有道理吧'],
+  video: ['声音太小了', '声音太大了', '0:37 那里是不是穿帮了', '两倍速看完了，谢谢', '背景音乐叫什么', '没字幕，差评', '字幕挡脸了，差评', '博主的声音和我想的不一样（没说是好是坏）',
+    '看了三遍，没看懂，但是点了赞'],
+  gift: ['领了，谢谢，取关了', '链接失效了。发帖三分钟就失效了？', '我怎么领不了，是不是你把名额自己用了', '羊毛党报到', '感谢博主，已薅，下次还来（指只在有羊毛的时候来）'],
+  lottery: ['抽我抽我抽我', '中奖的是不是你小号', '分母来了', '已关注已转发，开奖见分晓（指取关）', '我从来没中过，这次也不会，但我还是转了', '博主，我跟你说，我奶奶病了，这 300 块对我很重要'],
+  repost: ['原帖我看过，你翻错了一句', '侵删的意思是侵了再删吗', '来源呢', '请注明出处。哦你注明了，「来源：网络」', '这条我在三个号上都看到了，你是第四个', '原作者知道吗（他不知道）'],
+  fight: ['前排吃瓜', '打起来打起来', '我不站队，我只想看截图', '双方我都不认识，但我看得很开心', '有没有课代表总结一下', '博主冷静，对面有律师',
+    '我来晚了，现在该骂谁', '截图已保存，万一你删呢'],
+  ad: ['恰饭了？', '终于还是变成了自己讨厌的样子', '甲方看到这个数据会沉默', '这条广告我看完了，请把广告费分我一点', '「合作」两个字能不能再小一点，我差点就看见了',
+    '取关了（十分钟后又关注回来，怕错过下次抽奖）', '博主恰饭我支持，但这个我真不买'],
+  n_ai: ['这是 AI 写的吧', '这个工具下个月就收费，信不信', '提示词发一下', '我用了，它跟我说「作为一个 AI 语言模型」', '又要学新东西了吗，上一个我还没学'],
+  n_money: ['怎么赚的教教我，我很能吃苦', '看完热血沸腾，然后继续躺着', '所以课在哪买', '月入三万的方法看了三十个，月入还是三千', '博主，你缺不缺一个只分钱不干活的合伙人'],
+  n_coin: ['老师，我已经梭了，现在怎么办', '上次跟你的单，现在还套着', '格局打开了，钱包关上了', '老师，止损设在哪？老师？', '这次要是再跌，我就把你的帖子打印出来贴在床头'],
+  n_lewd: ['保存了', '就这？（已保存）', '博主讲得很清楚（原帖没有文字）', '兄弟们我先冲了', '请问衣服链接有吗，我女朋友想要（他没有女朋友）'],
+  n_repost: ['来源呢', '这个我在外网看过原版，原版更好笑', '翻译得不错，下次别翻了', '感谢搬运，我懒得翻墙（他正在墙外）'],
+  n_soup: ['哭了', '转给前任了，被拉黑了', '这句话我要抄在本子上，然后再也不翻开', '凌晨三点看到这条，更睡不着了', '说的就是我。上一条说的也是我。你是不是认识我'],
+  n_shop: ['求链接', '买了，吃灰了', '有没有平替的平替', '被你种草三次了，钱包说它不认识你', '等一个双十一。等了三个双十一了'],
+  n_life: ['猫呢', '博主今天吃的什么', '平平淡淡才是真（划走）', '好羡慕这种生活（指有空发推）', '今天也来看看博主有没有上班']
+};
+
+var NOTIFS = [
+  '「互关必回」关注了你。三分钟后他取关了，因为你没回。',
+  '有人把你加进了一个列表，列表的名字叫「观察」。',
+  '系统觉得你可能认识「前同事老张」。你确实认识，所以没点。',
+  '一个账号关注了你，简介写着「全网最低价」。',
+  '你被拉进了一个 3000 人的群聊，群名是一串你不认识的文字。',
+  '有人给你两个月前的帖子点了赞，然后取消了。',
+  '平台提醒：你已连续在线 6 小时。它的意思是希望你再接再厉。',
+  '你关注的人发了 47 条新帖，没有一条与你有关。',
+  '通知：你的帖子被 1 人收藏。那个人是你自己，手滑。',
+  '系统向你推荐一个「可能感兴趣的账号」，是你自己的小号。',
+  '有人引用了你的帖子，配文只有一个「？」。',
+  '你收到一条私信：「在吗」。发信人注册于今天，头像是美女，粉丝 0。',
+  '本周数据报告已生成。你决定不看。',
+  '你的一个粉丝把名字改成了「已注销」，但没注销。',
+  '平台给你推送了一条「起号秘籍」，作者的粉丝比你还少。',
+  '有人 @ 了你。是抽奖帖下面的「@三位好友」，你是他的第三位。',
+  '一个头像是风景照的人关注了你。接着又来了十个风景照。',
+  '你数了一下，今天打开 X 61 次。其中 58 次是看有没有新通知。',
+  '系统提示你的帖子「可能包含敏感内容」。那是一张泡面的照片。',
+  '有人在你的评论区发了自己的收款码。',
+  '你被一个不认识的人拉黑了。你想了一晚上，没想起来是谁。',
+  '平台祝你注册纪念日快乐，并建议你开通会员。',
+  '一个大V发了和你上周一模一样的观点，十万赞。',
+  '你的帖子被翻译成了英文，翻译结果是另一个意思，那个版本数据更好。',
+  '有个粉丝每天给你点赞，今天你点进他主页，发现他给所有人都点赞。'
+];
+
+// 随机事件。格式：{ id, title, t 文案, o: [[选项, 效果函数(返回结果文案), 可选条件, 不可选原因]], if 出现条件, min/max 回合, w 权重 }
+// 带 after 语义的连锁事件用 has()/since() 判断前置选择。
+
+var EVENTS = [
+  // ===== 特殊：冻结申诉 =====
+  { id: 'appeal', special: true, rep: true, title: '账号冻结',
+    t: '登录时弹出一行字：「你的账号因违反规则已被限制」。申诉入口藏在帮助中心第四层。',
+    o: [
+      ['老老实实写申诉', function (s) {
+        if (chance(s, has(s, 'refugee') ? 0.9 : 0.6)) { fx(s, { risk: -28, mood: 4 }); return '三天后收到一封英文邮件，账号恢复了。邮件署名是一个你念不出来的名字。'; }
+        fx(s, { risk: -8, fp: -0.06, mood: -8 }); return '申诉被驳回了一次，第二次才过。这期间掉了一批粉。';
+      }],
+      ['花 500 找「内部渠道」', function (s) {
+        fx(s, { money: -500 });
+        if (chance(s, 0.3)) { fx(s, { risk: -40 }); return '对方居然真的有渠道。半小时后解封，你对这个世界的理解又复杂了一点。'; }
+        fx(s, { risk: -10, mood: -10 }); return '对方收了钱，发来一个帮助中心的链接，然后把你拉黑了。号后来自己解了。';
+      }, function (s) { return s.money >= 500; }, '钱不够'],
+      ['开小号卖惨', function (s) { fx(s, { risk: -12, f: 80 + s.F * 0.02, q: 0.5, rep: -2 }); return '小号发了一条「大号没了，求扩散」，转发比你大号任何一条都多。解封后你有点失落。'; }]
+    ] },
+
+  // ===== 平台 =====
+  { id: 'p_algo', title: '算法改版', t: '平台宣布调整推荐算法。公告一共三句话，没人看懂。时间线上已经有十个人发了「新算法保姆级解读」。',
+    o: [
+      ['花时间研究新算法', function (s) { fx(s, { en: -1, w: 0.35 }); return '你翻了两天开源代码，得出的结论是：多发，发好的。下回合精力 -1，但账号权重涨了。'; }],
+      ['不管，照常发', function (s) { if (chance(s, 0.5)) { fx(s, { w: 0.15 }); return '新算法好像更喜欢你这种人。原因不明。'; } fx(s, { w: -0.2, mood: -4 }); return '新算法好像不太喜欢你这种人。原因不明。'; }],
+      ['也发一条「解读」', function (s) { fx(s, { f: 30 + s.F * 0.03, q: 0.5, rep: -3 }); return '你把别人的解读换了个说法发出去，数据不错。评论区有人问细节，你没回。'; }]
+    ] },
+  { id: 'p_purge', title: '清理僵尸粉', if: function (s) { return s.F > 800 && realPct(s) < 0.6; }, w: 2,
+    t: '平台开始清理不活跃账号。你一觉醒来，粉丝数的第一位变了。',
+    o: [
+      ['发帖骂平台', function (s) { var l = loseFake(s, (s.F - s.rF) * 0.45); fx(s, { risk: 4, rk: 'fight', mood: -3 }); return '掉了 ' + fmt(l) + ' 个粉。你发帖说平台吃相难看，有人回复：「掉的不都是你买的吗」。'; }],
+      ['假装无事发生', function (s) { var l = loseFake(s, (s.F - s.rF) * 0.45); fx(s, { mood: -6 }); return '掉了 ' + fmt(l) + ' 个粉。你把简介里的「万粉博主」悄悄删了。'; }]
+    ] },
+  { id: 'p_bot', title: '人机验证', t: '系统怀疑你是机器人，要求你完成验证：从 9 张图里选出所有的红绿灯。你选了三次都没过。',
+    o: [
+      ['耐心点完', function (s) { fx(s, { mood: -2 }); return '第七次终于过了。你开始怀疑自己到底是不是人。'; }],
+      ['懒得弄，先放着', function (s) { fx(s, { risk: 9, rk: 'other' }); return '账号带着「待验证」状态跑了三天，触达明显变差。'; }]
+    ] },
+  { id: 'p_share', title: '创作者分成', if: function (s) { return s.blue > 0 && s.F >= 500; },
+    t: '平台的创作者分成到账了。',
+    o: [
+      ['晒收益截图', function (s) { var m = Math.round(8 + s.st.totalViews * 0.00004); fx(s, { money: m, f: 20 + s.F * 0.04, q: 0.4, rep: -2 }); return '到账 ' + m + ' 块。你发了截图，配文「没想到发推也能赚钱」。这条数据很好，大家都想知道怎么赚这 ' + m + ' 块。'; }],
+      ['闷声收下', function (s) { var m = Math.round(8 + s.st.totalViews * 0.00004); fx(s, { money: m, mood: 3 }); return '到账 ' + m + ' 块。刚好够续蓝标的十分之一。'; }]
+    ] },
+  { id: 'p_down', title: '平台宕机', t: '平台崩了一整晚。你下意识点了四十多次刷新。',
+    o: [
+      ['去别的平台发牢骚', function (s) { fx(s, { mood: -3 }); return '你在另一个平台发了「X 崩了」，那边只有两个人看到，其中一个是你自己。'; }],
+      ['算了，睡觉', function (s) { fx(s, { mood: 8 }); return '你十点半就睡了，这是三个月来第一次。'; }]
+    ] },
+  { id: 'p_newfeat', title: '新功能内测', t: '平台推出一个新功能，据说用了会有流量扶持。上一个「有流量扶持」的功能已经下线了。',
+    o: [
+      ['第一时间用起来', function (s) { if (chance(s, 0.55)) { fx(s, { w: 0.3, f: 40 + s.F * 0.03, q: 0.7 }); return '这次扶持是真的。你成了第一批吃到的人。'; } fx(s, { mood: -4, en: -1 }); return '功能有 bug，你写的东西没发出去也没存下来。下回合精力 -1。'; }],
+      ['等别人先试', function (s) { return '两周后这个功能的入口被挪到了设置的最深处。你什么都没损失。'; }]
+    ] },
+  { id: 'p_boss', title: '老板发梗图', t: '平台老板凌晨发了一张没人看懂的梗图，两小时一千万浏览。',
+    o: [
+      ['抢前排玩梗', function (s) { var g = Math.round((60 + reachOf(s) * 0.4) * rnd(s)); fx(s, { f: g, q: 0.4 }); return '你的回复排在第 ' + rint(s, 20, 900) + ' 楼，涨粉 ' + g + '。'; }],
+      ['写一条认真分析这张图的帖子', function (s) { if (chance(s, 0.25)) { fx(s, { f: 200 + reachOf(s) * 0.8, q: 0.5, mood: 8 }); return '你的过度解读被老板本人点了赞。'; } fx(s, { mood: -3 }); return '你分析了八百字。那张图其实就是他手滑。'; }],
+      ['不凑这个热闹', function (s) { fx(s, { mood: 2 }); return '你睡了。'; }]
+    ] },
+  { id: 'p_search', title: '搜索不到自己', if: function (s) { return s.risk >= 50; }, w: 3,
+    t: '你用小号搜自己的名字，搜不到。搜帖子原文，也搜不到。',
+    o: [
+      ['停更几天避风头', function (s) { fx(s, { risk: -14, en: -2, mood: -3 }); return '你忍了三天没发帖。下回合精力 -2，但账号似乎缓过来一点。'; }],
+      ['改名换头像', function (s) { fx(s, { risk: -5, fp: -0.04 }); return '你换了个名字。有些粉丝没认出来，顺手取关了。'; }],
+      ['不信邪，继续发', function (s) { fx(s, { risk: 6, rk: 'other', mood: -4 }); return '你连发五条，每条浏览都是两位数。'; }]
+    ] },
+  { id: 'p_report', title: '批量举报', if: function (s) { return cnt(s, 'fight') >= 1 || s.rep < 35; }, w: 2,
+    t: '后台提示你有多条帖子被举报。举报理由五花八门，其中一条是「我不喜欢」。',
+    o: [
+      ['逐条申诉', function (s) { fx(s, { en: -1, risk: -4 }); return '你填了九张表。下回合精力 -1。'; }],
+      ['发帖：「谁在举报我」', function (s) { fx(s, { risk: 6, rk: 'fight', f: 30 + s.F * 0.02, q: 0.4 }); return '这条帖子数据不错，然后它也被举报了。'; }],
+      ['不理', function (s) { fx(s, { risk: 8, rk: 'other' }); return '举报攒到了某个你不知道的阈值。'; }]
+    ] },
+  { id: 'p_peerfeed', title: '推荐流', min: 4, t: '你的推荐流里全是同行。每个人都在涨粉，每个人都在发「感谢 X 万粉」。',
+    o: [
+      ['全部点「不感兴趣」', function (s) { fx(s, { mood: 6 }); return '推荐流清净了两天，然后他们又回来了。'; }],
+      ['逐个研究他们怎么发的', function (s) { fx(s, { w: 0.12, mood: -6 }); return '你学到了一些东西，也确认了自己是其中数据最差的一个。'; }]
+    ] },
+  { id: 'p_ban_wave', title: '封号潮', min: 8, t: '平台突然大规模封号，时间线上哀鸿遍野。你认识的三个号没了。',
+    o: [
+      ['连夜删掉可疑的旧帖', function (s) { fx(s, { risk: -15, en: -1 }); return '你删到凌晨四点。下回合精力 -1。'; }],
+      ['发帖「收留」被封的人', function (s) { fx(s, { f: 60 + s.F * 0.05, q: 0.35, risk: 3, rk: 'other' }); return '一批小号关注了你。他们的大号是因为什么没的，你没敢问。'; }],
+      ['关我什么事', function (s) { if (s.risk >= 40) { fx(s, { risk: 12, rk: 'other' }); return '好像关你的事。你的账号健康度明显掉了。'; } return '确实不关你的事。'; }]
+    ] },
+
+  // ===== 大V =====
+  { id: 'v_rt', title: '大V转发', if: function (s) { return s.st.posts >= 3; }, min: 3,
+    t: '一个三十万粉的大V转发了你的帖子，配文只有一个字：「对」。',
+    o: [
+      ['趁热发一条干货', function (s) { fx(s, { f: 300 + reachOf(s) * 1.2, q: 0.6, mood: 10, flag: 'bigv' }); s.st.bigv++; return '顺着这波流量来的人看到了你的新帖，留下了不少。'; }],
+      ['回复「感谢老师」并置顶', function (s) { fx(s, { f: 200 + reachOf(s) * 0.7, q: 0.4, mood: 8, flag: 'bigv' }); s.st.bigv++; return '涨了一波粉。有人在评论区说你「舔」。'; }],
+      ['截图发朋友圈', function (s) { fx(s, { f: 100 + reachOf(s) * 0.4, q: 0.4, mood: 12, flag: 'bigv' }); s.st.bigv++; return '朋友圈有 4 个人点赞，其中一个问你「这是谁」。'; }]
+    ] },
+  { id: 'v_hang', title: '被大V挂了', if: function (s) { return s.st.posts >= 4; }, min: 5,
+    t: '一个大V引用了你的帖子：「现在什么人都能出来讲了。」他的粉丝正在往你评论区赶。',
+    o: [
+      ['道歉删帖', function (s) { fx(s, { mood: -10, rep: -3 }); return '你删了帖。他又发了一条：「删了，没意思。」'; }],
+      ['正面硬刚', function (s) { if (chance(s, 0.4)) { fx(s, { f: 400 + reachOf(s), q: 0.4, mood: 10, risk: 6, rk: 'fight', flag: 'fought_v' }); return '你列了五条反驳，围观的人发现你居然是对的。'; } fx(s, { fp: -0.05, mood: -14, risk: 6, rk: 'fight', flag: 'fought_v' }); return '你列了五条反驳，他只回了一个表情。你输了。'; }],
+      ['装没看见', function (s) { fx(s, { mood: -6, f: 50 + reachOf(s) * 0.2, q: 0.3 }); return '骂你的人里有一小部分顺手关注了你，方便以后继续骂。'; }]
+    ] },
+  { id: 'v_copy', title: '教程被抄', if: function (s) { return cnt(s, 'tut') >= 2; }, min: 6,
+    t: '一个十万粉的账号把你的教程换了个标题重发了，数据是你的四十倍。你的截图上还留着你的水印，他没裁干净。',
+    o: [
+      ['挂他', function (s) { fx(s, { risk: 5, rk: 'fight', flag: 'copy_fight' }); return '你做了对比图发出去。他还没回应。'; }],
+      ['在他评论区礼貌提醒', function (s) { fx(s, { mood: -5, flag: 'copy_polite' }); return '你的评论被折叠了。'; }],
+      ['算了', function (s) { fx(s, { mood: -8 }); return '你安慰自己：至少说明内容是好的。'; }]
+    ] },
+  { id: 'v_copy2a', title: '抄袭后续', if: function (s) { return since(s, 'copy_fight') >= 1; }, w: 6,
+    t: '你挂人的那条帖子有结果了。',
+    o: [
+      ['看看发生了什么', function (s) { if (chance(s, 0.55)) { fx(s, { f: 500 + reachOf(s) * 1.5, q: 0.7, rep: 8, mood: 12 }); return '他道歉了，还补了你的署名。围观的人顺着链接来关注了你。'; } fx(s, { fp: -0.04, mood: -12 }); return '他说是「英雄所见略同」，他的粉丝说你蹭热度。你被冲了一晚上。'; }]
+    ] },
+  { id: 'v_copy2b', title: '抄袭后续', if: function (s) { return since(s, 'copy_polite') >= 2; }, w: 6,
+    t: '那个抄你教程的账号私信你了。',
+    o: [
+      ['点开', function (s) { fx(s, { money: 200, mood: 3 }); return '他说「不好意思是运营弄的」，转了你 200 块，希望你把评论删了。你删了。'; }],
+      ['不看', function (s) { fx(s, { mood: 2 }); return '你没点开。那条私信的预览是「兄弟，在吗」。'; }]
+    ] },
+  { id: 'v_collab', title: '互推邀请', if: function (s) { return s.F >= 3000; },
+    t: '一个和你差不多体量的博主私信：「互推一波？我先发。」你看了一眼他的主页，一半帖子是抽奖。',
+    o: [
+      ['答应', function (s) { fx(s, { f: s.F * 0.07, q: 0.3, rep: -2 }); return '你们互相夸了对方一段。来的粉丝第二天少了一半。'; }],
+      ['拒绝', function (s) { fx(s, { rep: 2 }); return '他回了个「好的」，然后取关了你。'; }]
+    ] },
+  { id: 'v_fall', title: '大V塌房', min: 6, t: '你上个月夸过的那位大V塌房了。有人翻出了你当时那条「老师说得太对了」。',
+    o: [
+      ['删帖', function (s) { fx(s, { mood: -3 }); return '删了。截图还在别人手里。'; }],
+      ['发帖切割', function (s) { fx(s, { rep: -4, f: 30 + s.F * 0.02, q: 0.4 }); return '你发了「我早就觉得不对劲」。有人把你两条帖子拼在了一起。'; }],
+      ['自嘲一下', function (s) { fx(s, { rep: 5, mood: 3, f: 40 + s.F * 0.02, q: 0.7 }); return '你转发了自己那条旧帖：「眼光一如既往。」大家笑了一下就过去了。'; }]
+    ] },
+  { id: 'v_followback', title: '回关', if: function (s) { return cnt(s, 'replyv') >= 3; },
+    t: '你天天去回复的那个大V，回关你了。',
+    o: [
+      ['截图发帖炫耀', function (s) { fx(s, { mood: 10, rep: -2, f: 20 + s.F * 0.01, q: 0.5 }); return '你发了截图。两天后他取关了，可能是看到了。'; }],
+      ['稳住，不声张', function (s) { fx(s, { mood: 12, w: 0.15 }); return '你什么都没说。但你那天走路是带风的。'; }]
+    ] },
+  { id: 'v_followparty', title: '互关活动', t: '一个大V发帖：「评论区互关，有关必回。」下面已经有两千条「已关，回」。',
+    o: [
+      ['加入接龙', function (s) { fx(s, { f: 200 + s.F * 0.05, q: 0.12, risk: 4, rk: 'group' }); return '涨了一堆粉，全是和你一样来涨粉的人。'; }],
+      ['划走', function (s) { fx(s, { mood: 1 }); return '你划走了，并且隐约觉得自己高他们一等。'; }]
+    ] },
+  { id: 'v_course', title: '联名卖课', if: function (s) { return s.F >= 8000; },
+    t: '一个大V找你联名开课：「你出内容，我出流量，三七分，你三。」',
+    o: [
+      ['接', function (s) { var m = Math.round(s.F * 0.4); fx(s, { money: m, rep: -15, risk: 5, rk: 'course', flag: 'course' }); return '课卖了不少，你分到 ' + fmt(m) + ' 块。学员群里的问题全是你在答。'; }],
+      ['还价五五', function (s) { if (chance(s, 0.4)) { var m = Math.round(s.F * 0.65); fx(s, { money: m, rep: -15, flag: 'course' }); return '他居然同意了。你分到 ' + fmt(m) + ' 块。'; } fx(s, { mood: -3 }); return '他已读不回。一周后他和你的同行联名了。'; }],
+      ['拒绝', function (s) { fx(s, { rep: 4 }); return '你说「我还没什么可教的」。他回：「没关系啊。」'; }]
+    ] },
+  { id: 'v_banned', title: '大V被封', min: 8, t: '你这个赛道最大的号被封了。四十万粉丝一夜之间没了去处。',
+    o: [
+      ['发帖：「他的内容我这都有」', function (s) { fx(s, { f: 400 + reachOf(s), q: 0.5, rep: -4 }); return '难民涌了进来。有人说你吃人血馒头，但他也关注了。'; }],
+      ['发一条悼念', function (s) { fx(s, { f: 80 + reachOf(s) * 0.3, q: 0.6, rep: 3 }); return '你写了一段回忆。写完才想起他其实拉黑过你。'; }],
+      ['什么都不发', function (s) { return '三天后他的小号出现了，粉丝又回去了。'; }]
+    ] },
+
+  // ===== 粉丝与杠精 =====
+  { id: 'f_troll', title: '杠精', if: function (s) { return s.st.posts >= 2; },
+    t: '有人在你帖子下面写了六百字反驳，逐句引用，结尾是「建议多读书」。他的主页没有一条原创。',
+    o: [
+      ['认真回复', function (s) { fx(s, { en: -1, rep: 3, mood: -4 }); return '你回了八百字。他回：「急了。」下回合精力 -1。'; }],
+      ['拉黑', function (s) { fx(s, { mood: 4 }); return '世界安静了。'; }],
+      ['把他的评论置顶', function (s) { fx(s, { f: 30 + s.F * 0.02, q: 0.5, mood: 2 }); return '评论区替你吵了一整天，帖子的数据因此好了不少。'; }]
+    ] },
+  { id: 'f_fan', title: '第一个铁粉', if: function (s) { return s.F >= 100; }, max: 20,
+    t: '有个人每条帖子都给你点赞评论，已经连续两周了。他的头像是一只柯基。',
+    o: [
+      ['回关，并且回复他', function (s) { fx(s, { mood: 8, rep: 3, flag: 'ironfan' }); return '他回了一长串感叹号。'; }],
+      ['专门发帖感谢', function (s) { fx(s, { mood: 6, rep: 4, flag: 'ironfan' }); return '你发了一条感谢帖。这条只有他一个人点赞。'; }],
+      ['没注意', function (s) { fx(s, { flag: 'ironfan_ignored' }); return '你最近通知太多，没顾上。'; }]
+    ] },
+  { id: 'f_fan2', title: '柯基头像', if: function (s) { return since(s, 'ironfan') >= 5; }, w: 5,
+    t: '那个柯基头像的铁粉私信你：「我在一家公司做市场，我们想找博主合作，我第一个想到你。」',
+    o: [
+      ['接', function (s) { var m = 300 + Math.round(s.F * 0.03); fx(s, { money: m, mood: 8 }); return '报酬 ' + m + ' 块，是你目前最体面的一单。稿子他一个字没改。'; }],
+      ['帮他免费发', function (s) { fx(s, { rep: 6, mood: 6 }); return '你没收钱。他后来给你寄了一箱公司的产品，是猫粮。你没有猫。'; }]
+    ] },
+  { id: 'f_fan3', title: '柯基头像', if: function (s) { return since(s, 'ironfan_ignored') >= 5; }, w: 4,
+    t: '那个连续给你点了一个月赞的柯基头像，今天发了一条帖子：「取关了一些人。有些人红了就不认识人了。」你现在的粉丝是 ' + '他当初关注你时的很多倍。',
+    o: [
+      ['去道个歉', function (s) { fx(s, { rep: 3, mood: -2 }); return '他回：「没说你。」然后把那条帖子删了。'; }],
+      ['应该不是说我', function (s) { fx(s, { rep: -2 }); return '是说你。'; }]
+    ] },
+  { id: 'f_dm', title: '求带', if: function (s) { return s.F >= 1000; },
+    t: '私信：「老师，我也想起号，能带带我吗？我很能吃苦。」他的账号注册于昨天。',
+    o: [
+      ['耐心回了一大段', function (s) { fx(s, { rep: 4, mood: 2, en: -1 }); return '你写了五百字。他回：「太长了，有没有简单点的。」下回合精力 -1。'; }],
+      ['「有个课你可以了解下」', function (s) { fx(s, { money: 199, rep: -5 }); return '他付了 199。你现在需要有一门课。'; }],
+      ['截图发出来', function (s) { fx(s, { f: 30 + s.F * 0.02, q: 0.4, rep: -4 }); return '你配文「现在的新人」。评论区有人说：「你三个月前不也这样。」'; }]
+    ] },
+  { id: 'f_bots', title: '评论区机器人', if: function (s) { return s.F >= 300; },
+    t: '你每条帖子下面的前三条评论都是机器人：一个卖币的，一个「主页有惊喜」，一个只会说「说得好」。',
+    o: [
+      ['一个个拉黑', function (s) { fx(s, { en: -1, rep: 2 }); return '你拉黑了四十个。第二天来了四十个新的。下回合精力 -1。'; }],
+      ['不管', function (s) { fx(s, { rep: -1 }); return '「说得好」那个机器人，是你评论区最稳定的互动来源。'; }],
+      ['回复它们', function (s) { fx(s, { mood: 3 }); return '你回了卖币的机器人「多少钱」，它没理你。连机器人都不回你。'; }]
+    ] },
+  { id: 'f_ai', title: '是不是 AI 写的', if: function (s) { return s.st.posts >= 5; },
+    t: '评论：「这是 AI 写的吧，一股味。」这条评论有 30 个赞，比你正文的赞还多。',
+    o: [
+      ['承认用了', function (s) { fx(s, { rep: 3, mood: -2 }); return '你说「润色用了一下」。大家反而没那么介意了。'; }],
+      ['坚决否认', function (s) { if (chance(s, 0.5)) { fx(s, { rep: -6, mood: -5 }); return '有人指出你的帖子里还留着一句「希望以上内容对你有帮助」。'; } fx(s, { mood: 2 }); return '你确实是自己写的。只是你写得像 AI，这更让人难过。'; }],
+      ['「你怎么证明你不是 AI」', function (s) { fx(s, { f: 20 + s.F * 0.02, q: 0.5 }); return '评论区开始互相怀疑对方是 AI，热闹了一下午。'; }]
+    ] },
+  { id: 'f_oldpost', title: '旧帖被扒', min: 10, if: function (s) { return s.F >= 2000; },
+    t: '有人翻出你两个月前的帖子，和你昨天说的话正好相反。两张截图已经被拼在了一起。',
+    o: [
+      ['连夜删旧帖', function (s) { fx(s, { rep: -5, mood: -4 }); return '删帖这个动作也被截图了。'; }],
+      ['长文解释心路历程', function (s) { fx(s, { en: -1, rep: 1 }); return '你写了一千字。总结起来就是「人是会变的」。下回合精力 -1。'; }],
+      ['转发自嘲', function (s) { fx(s, { rep: 6, f: 40 + s.F * 0.02, q: 0.7 }); return '你转发并配文：「两个月前的我，你好。」这是你那周数据最好的一条。'; }]
+    ] },
+  { id: 'f_tip', title: '打赏', if: function (s) { return s.st.tutLong >= 2; },
+    t: '有人给你打赏了一杯咖啡，留言：「教程很有用，照着做成了。」',
+    o: [
+      ['道谢', function (s) { fx(s, { money: 25, mood: 12 }); return '25 块。这是你在 X 上赚到的最干净的一笔钱。'; }],
+      ['发帖：「原来真的有人看」', function (s) { fx(s, { money: 25, mood: 10, rep: 2 }); return '又有两个人打赏了。然后就没有然后了。'; }]
+    ] },
+  { id: 'f_unfollow', title: '掉粉', if: function (s) { return s.F >= 500; },
+    t: '今天掉了 ' + '一百多个粉。你什么都没发。',
+    o: [
+      ['查查是谁取关了', function (s) { fx(s, { f: -100, mood: -8 }); return '你装了个插件查取关名单，在里面看到了两个现实中的朋友。'; }],
+      ['不看，不想知道', function (s) { fx(s, { f: -100, mood: -2 }); return '你没查。但你想了一晚上。'; }]
+    ] },
+  { id: 'f_mom', title: '你妈关注了你', min: 4,
+    t: '新增粉丝通知：一个头像是荷花的账号关注了你，简介是「平安是福」。那是你妈。',
+    o: [
+      ['拉黑', function (s) { fx(s, { mood: -3 }); return '晚上你妈打电话问你是不是把她拉黑了。'; }],
+      ['假装不知道，照常发', function (s) { if (N(s, 'lewd') || N(s, 'coin')) { fx(s, { mood: -12 }); return '你妈给你上一条帖子点了赞，并且转发到了家族群。'; } fx(s, { mood: 3 }); return '你妈每条都点赞，是你最稳定的一个数据来源。'; }],
+      ['换个号', function (s) { fx(s, { fp: -0.03, mood: -2 }); return '你改了名字和头像。你妈没找到，有些粉丝也没找到。'; }]
+    ] },
+  { id: 'f_thanks', title: '一条私信', if: function (s) { return s.st.tutLong >= 4; }, min: 10,
+    t: '私信：「照着你的教程做了一个月，上周靠这个找到工作了。没别的事，就是想说声谢谢。」',
+    o: [
+      ['回他：「是你自己厉害」', function (s) { fx(s, { mood: 18, rep: 4 }); return '你把这条私信截了图，存在了一个叫「撑不住的时候看」的相册里。'; }],
+      ['征得同意后发出来', function (s) { fx(s, { mood: 12, rep: 6, f: 60 + s.F * 0.03, q: 0.9 }); return '评论区有人说「又一个自导自演的」。你发现自己没那么在意。'; }]
+    ] },
+  { id: 'f_fake', title: '高仿号', if: function (s) { return s.F >= 5000; },
+    t: '有个账号用了你的头像和名字，只是把字母 l 换成了数字 1，正在私信你的粉丝「加群领资料」。',
+    o: [
+      ['发帖澄清并举报', function (s) { fx(s, { rep: 4, en: -1 }); return '你举报了它。平台回复：「未发现违规。」下回合精力 -1。'; }],
+      ['不管', function (s) { fx(s, { rep: -6 }); return '有三个粉丝被骗了钱，来你评论区要说法。'; }],
+      ['某种意义上，这说明我红了', function (s) { fx(s, { mood: 8, rep: -4 }); return '你甚至有点高兴。'; }]
+    ] },
+  { id: 'f_howbuy', title: '「怎么买」', if: function (s) { return (N(s, 'shop') || N(s, 'money') || N(s, 'ai')) && s.F >= 600; },
+    t: '你随手提了一句最近在用的东西，评论区有三十个人问「求链接」。',
+    o: [
+      ['挂个带佣金的链接', function (s) { var m = 80 + Math.round(s.rF * 0.02); fx(s, { money: m, rep: -2 }); return '佣金 ' + m + ' 块。原来这就叫带货。'; }],
+      ['直接告诉他们名字', function (s) { fx(s, { rep: 4, mood: 2 }); return '你打了产品名。有人说「博主好实在」，这句话让你高兴了一天。'; }]
+    ] },
+
+  // ===== 商业诱惑 =====
+  { id: 'c_gray', title: '第一个广告', if: function (s) { return s.F >= 1000; },
+    t: '私信：「博主你好，长期合作，发一条 400，日结。」你点开他发来的素材，是个「线上娱乐平台」。',
+    o: [
+      ['接了，就发一条', function (s) { fx(s, { money: 400, risk: 22, rk: 'shill', rep: -10 }); return '400 块到账。你把那条帖子设成了仅粉丝可见，好像这样就不算发过。'; }],
+      ['拒绝', function (s) { fx(s, { rep: 2, mood: 2 }); return '你回了「不接」。他回：「600？」'; }],
+      ['举报他', function (s) { fx(s, { mood: 3 }); return '举报成功。第二天来了另一个号，发的是同一段话。'; }]
+    ] },
+  { id: 'c_wrapper', title: '工具推广', if: function (s) { return s.F >= 1500; },
+    t: '一个新出的工具找你推广，报价不错。你试了一下，它在你电脑上闪退了两次。',
+    o: [
+      ['照甲方的稿子夸', function (s) { var m = 200 + Math.round(s.F * 0.03); fx(s, { money: m, rep: -7, flag: 'badad' }); return '到账 ' + m + ' 块。评论区有人问「你自己用了吗」。'; }],
+      ['写真实测评，优缺点都写', function (s) { if (chance(s, 0.5)) { var m = 100 + Math.round(s.F * 0.015); fx(s, { money: m, rep: 6 }); return '甲方居然接受了，只是把尾款打了五折：' + m + ' 块。'; } fx(s, { rep: 5, mood: -2 }); return '甲方说「那算了」。你把测评照样发了，没收钱。'; }],
+      ['不接', function (s) { fx(s, { rep: 1 }); return '你的同行接了。他的标题是「我愿称之为年度最佳」。'; }]
+    ] },
+  { id: 'c_badad2', title: '推广翻车', if: function (s) { return since(s, 'badad') >= 3; }, w: 5,
+    t: '你推广过的那个工具停止运营了。充了年费的人在你那条帖子下面排队。',
+    o: [
+      ['道歉，自掏腰包退一部分', function (s) { fx(s, { money: -300, rep: 8, mood: -4 }); return '你退了 300 块。有人说「这博主还行」。'; }],
+      ['删帖', function (s) { fx(s, { rep: -10 }); return '你删了帖。有人早就存好了截图。'; }],
+      ['「我也是受害者」', function (s) { fx(s, { rep: -5, mood: -3 }); return '你说你也充了年费。没人信，虽然你确实充了。'; }]
+    ] },
+  { id: 'c_mcn', title: 'MCN 签约', if: function (s) { return s.F >= 3000; }, min: 8,
+    t: '一家 MCN 找你签约：保底月薪，流量扶持，专人运营。合同有 23 页，对方说「都是模板，签就行」。',
+    o: [
+      ['签', function (s) { fx(s, { end: 'mcn' }); return '你签了。'; }],
+      ['先把合同看完', function (s) { fx(s, { rep: 3, mood: 4, en: -1 }); return '第 17 页写着：账号归公司所有，解约赔偿 50 万。你没签。下回合精力 -1。'; }],
+      ['不签', function (s) { return '对方说「你会后悔的」。你现在还不知道会不会。'; }]
+    ] },
+  { id: 'c_sell', title: '有人想买你的号', if: function (s) { return s.F >= 2500; }, min: 8,
+    t: function (s) { return '私信：「号卖吗？' + fmt(Math.round(s.F * 0.28)) + ' 块，今天能交易。」'; },
+    o: [
+      ['卖', function (s) { fx(s, { money: Math.round(s.F * 0.28), end: 'sold' }); return '你把密码发了过去。'; }],
+      ['抬价', function (s) { if (chance(s, 0.4)) { fx(s, { flag: 'sell_high' }); return '他说要考虑一下。'; } fx(s, { mood: -2 }); return '他回了个「呵呵」，没再出现。'; }],
+      ['不卖', function (s) { fx(s, { mood: 3 }); return '你说不卖。说完自己也有点意外。'; }]
+    ] },
+  { id: 'c_sell2', title: '买号的人回来了', if: function (s) { return since(s, 'sell_high') >= 1; }, w: 8,
+    t: function (s) { return '那个想买号的人回来了：「' + fmt(Math.round(s.F * 0.5)) + '，不能再多了。」'; },
+    o: [
+      ['成交', function (s) { fx(s, { money: Math.round(s.F * 0.5), end: 'sold' }); return '成交。'; }],
+      ['还是不卖', function (s) { fx(s, { mood: 5, rep: 1 }); return '你发现自己已经舍不得了。'; }]
+    ] },
+  { id: 'c_club', title: '会员群', if: function (s) { return s.F >= 2000; },
+    t: '好几个粉丝问你有没有群。你的同行开了个 299 的「核心圈子」，据说进了 400 人。',
+    o: [
+      ['也开一个 299 的', function (s) { var m = Math.round(s.rF * 0.012) * 299; fx(s, { money: m, rep: -6, flag: 'club' }); return '进了 ' + Math.round(s.rF * 0.012) + ' 个人，收款 ' + fmt(m) + ' 块。现在你得想想群里发什么。'; }],
+      ['开个免费群', function (s) { fx(s, { rep: 6, flag: 'freeclub' }); s.enBase = Math.max(2, s.enBase); fx(s, { en: -1 }); return '群一天就满了。里面每天 999+ 条消息，没有一条和你有关。下回合精力 -1。'; }],
+      ['不开', function (s) { return '你说「没时间维护」。这是实话。'; }]
+    ] },
+  { id: 'c_club2', title: '会员群维权', if: function (s) { return since(s, 'club') >= 4; }, w: 6,
+    t: '你那个 299 的会员群，已经九天没人说话了。今天终于有人说话了：「群主，退钱。」',
+    o: [
+      ['全额退', function (s) { fx(s, { money: -Math.round(s.st.earned * 0.25), rep: 6, mood: -5 }); return '你把钱退了。有人退完之后说「其实我只是试试」。'; }],
+      ['把带头的踢了', function (s) { fx(s, { rep: -12, risk: 6, rk: 'course' }); return '他把被踢的截图发到了时间线上，配文「' + '花 299 买了个教训' + '」。'; }],
+      ['解散群', function (s) { fx(s, { rep: -15, risk: 8, rk: 'course', mood: -4 }); return '你点了解散。四百个人同时收到了那条系统通知。'; }]
+    ] },
+  { id: 'c_free', title: '白嫖', if: function (s) { return s.F >= 800; },
+    t: '一个品牌找你合作：「我们没有预算，但是可以给你曝光。」他们的官方账号有 212 个粉丝。',
+    o: [
+      ['帮他们发', function (s) { fx(s, { rep: -2, mood: -3 }); return '你发了。他们转发了你的帖子，给你带来了 0 个新粉丝。'; }],
+      ['报个价', function (s) { fx(s, { mood: 3 }); return '你报了 500。他们说「我们再内部对齐一下」，然后再也没对齐回来。'; }]
+    ] },
+  { id: 'c_swap', title: '资源互换群', if: function (s) { return s.F >= 300; },
+    t: '有人拉你进了一个「博主互助群」，规则是：每天互相点赞评论，谁不点就踢谁。',
+    o: [
+      ['每天打卡', function (s) { fx(s, { w: 0.1, risk: 8, rk: 'group', en: -1, flag: 'swap' }); return '你的每条帖子下面都有二十条「学到了」。下回合精力 -1。'; }],
+      ['潜水', function (s) { fx(s, { mood: -1 }); return '三天后你因为「不活跃」被踢了。'; }],
+      ['退群', function (s) { fx(s, { mood: 2 }); return '你退了。群主私信你：「格局小了。」'; }]
+    ] },
+  { id: 'c_runaway', title: '带的货出事了', if: function (s) { return cnt(s, 'sell') + cnt(s, 'ad') >= 3; }, w: 2,
+    t: '你带过的一个产品被曝光质量问题。买过的粉丝找到了你当初那句「我自己也在用」。',
+    o: [
+      ['道歉，置顶说明', function (s) { fx(s, { rep: 3, mood: -5, fp: -0.02 }); return '你写了道歉。有人说「至少没装看不见」。'; }],
+      ['把那条帖子删了', function (s) { fx(s, { rep: -9 }); return '删了。评论区的人换到你最新一条帖子下面继续问。'; }],
+      ['「我只是分享，没让你买」', function (s) { fx(s, { rep: -14, fp: -0.05, mood: -3 }); return '这句话被截图了。'; }]
+    ] },
+  { id: 'c_platform', title: '课程平台邀请', if: function (s) { return s.st.tutLong >= 5 && s.F >= 3000; },
+    t: '一个课程平台的运营找到你：「你的教程写得很好，要不要做成付费专栏？我们抽三成。」',
+    o: [
+      ['做', function (s) { var m = Math.round(s.rF * 0.15); fx(s, { money: m, rep: -2, en: -1 }); return '你把免费教程整理了一遍，加了两章。卖了 ' + fmt(m) + ' 块，没人骂你，因为免费版还在。下回合精力 -1。'; }],
+      ['继续免费发', function (s) { fx(s, { rep: 5, mood: 3 }); return '你说「先不了」。说完算了一下大概少赚多少，心情有点复杂。'; }]
+    ] },
+  { id: 'c_tax', title: '收款被风控', if: function (s) { return s.st.earned >= 3000; },
+    t: '你的收款账户被风控了，提示「交易存在异常」。客服让你提供每一笔收入的合同。',
+    o: [
+      ['一笔笔补材料', function (s) { fx(s, { en: -2, mood: -6 }); return '你翻了两天聊天记录。下回合精力 -2。'; }],
+      ['换个收款方式', function (s) { fx(s, { money: -Math.round(s.money * 0.08), mood: -3 }); return '新渠道手续费高了不少。'; }]
+    ] },
+
+  // ===== 同行 =====
+  { id: 'r_copyviral', title: '爆款被搬', if: function (s) { return since(s, 'viral') >= 1; }, w: 3,
+    t: '一个营销号把你那条爆款原封不动搬走了。他的版本，数据是你的十倍。',
+    o: [
+      ['去他评论区说「原作者在这」', function (s) { fx(s, { f: 80 + reachOf(s) * 0.4, q: 0.6 }); return '你的评论被顶到了第一条。有人顺着过来关注了你。'; }],
+      ['举报侵权', function (s) { fx(s, { mood: -3 }); return '平台要求你提供版权证明。你提供不了一条推文的版权证明。'; }],
+      ['算了，说明我写得好', function (s) { fx(s, { mood: -5 }); return '你这么安慰了自己三次。'; }]
+    ] },
+  { id: 'r_groupgone', title: '互推群', if: function (s) { return cnt(s, 'group') >= 2; },
+    t: '你待的那个互推群一夜之间解散了。群主的号被封了，据说是因为「操纵平台」。群成员名单在别人手里。',
+    o: [
+      ['赶紧取关群里互关的人', function (s) { fx(s, { risk: -6, f: -Math.round((s.F - s.rF) * 0.2) }); return '你取关了一百多个人，他们也取关了你。'; }],
+      ['没事，轮不到我', function (s) { fx(s, { risk: 12, rk: 'group' }); return '轮到了一点。'; }]
+    ] },
+  { id: 'r_space', title: '连麦邀请', if: function (s) { return s.F >= 500; },
+    t: '一个同行邀请你上他的语音直播，聊聊「起号心得」。你上次公开讲话是大学答辩。',
+    o: [
+      ['去', function (s) { if (chance(s, 0.6)) { fx(s, { f: 100 + reachOf(s) * 0.5, q: 0.8, mood: 6 }); return '你讲得磕磕绊绊，但有几句是真话，听众记住了。'; } fx(s, { mood: -6 }); return '你全程只说了「对」「是的」「我也这么觉得」。'; }],
+      ['不去', function (s) { return '你说那天有事。那天你在家刷了一晚上 X。'; }]
+    ] },
+  { id: 'r_shade', title: '被阴阳', if: function (s) { return s.F >= 1500; },
+    t: '一个同行发帖：「有些人，教程抄一半，数据买一半，也好意思叫博主。」没点名。评论区有人 @ 了你。',
+    o: [
+      ['对号入座，回击', function (s) { fx(s, { risk: 5, rk: 'fight', f: 60 + s.F * 0.03, q: 0.4, rep: -3 }); return '你回击了。他说：「我说你了吗？」'; }],
+      ['不回应', function (s) { fx(s, { mood: -5 }); return '你没回应。但你把那条帖子看了二十遍。'; }],
+      ['给他点个赞', function (s) { fx(s, { rep: 4, mood: 3 }); return '你点了个赞。他慌了，把帖子删了。'; }]
+    ] },
+  { id: 'r_friend', title: '同期的朋友', min: 12,
+    t: function (s) { return '和你同一周注册的那个朋友，今天发了「感谢十万粉」。你现在是 ' + fmt(s.F) + '。'; },
+    if: function (s) { return s.F < 60000; },
+    o: [
+      ['真心恭喜', function (s) { fx(s, { mood: -4, rep: 2 }); return '你发了「恭喜！」。打这两个字花了你三分钟。'; }],
+      ['向他请教', function (s) { fx(s, { w: 0.25, mood: -3 }); return '他说了很多。核心就一句：「我也不知道，发着发着就起来了。」但他提到的几个细节确实有用。'; }],
+      ['发一条酸的', function (s) { fx(s, { rep: -4, mood: 2 }); return '你发了「粉丝多不代表什么」。所有人都知道你在说谁。'; }]
+    ] },
+  { id: 'r_matrix', title: '矩阵号', if: function (s) { return s.F >= 1000; },
+    t: '同行教你：「开五个小号，自己给自己点赞评论转发，冷启动特别快。平台查不出来。」',
+    o: [
+      ['试试', function (s) { fx(s, { w: 0.3, risk: 16, rk: 'buy', en: -1 }); return '头两天数据确实好了。平台查不查得出来，你很快就会知道。下回合精力 -1。'; }],
+      ['不搞', function (s) { fx(s, { rep: 1 }); return '半个月后那个同行的六个号一起没了。'; }]
+    ] },
+  { id: 'r_case', title: '反面案例', if: function (s) { return s.st.posts >= 10 && s.F < 3000; }, min: 12,
+    t: '一个卖起号课的博主，把你的主页截了图放进课件，标题是「新手最常见的 7 个错误」。你占了其中 4 个。',
+    o: [
+      ['去看看他说得对不对', function (s) { fx(s, { w: 0.3, mood: -8 }); return '他说得对。'; }],
+      ['要求他打码', function (s) { fx(s, { mood: -3 }); return '他给你的名字打了码，头像没打。'; }],
+      ['挂他', function (s) { fx(s, { risk: 5, rk: 'fight', f: 50 + s.F * 0.05, q: 0.5 }); return '你挂了他。他的课因此多卖了几十份。'; }]
+    ] },
+  { id: 'r_quit', title: '同行退网', min: 10,
+    t: '一个你常互动的同行发了告别帖：「做不动了。这个号留给大家当个教训。」他最后 @ 了几个人，其中有你。',
+    o: [
+      ['转发，写一段话送他', function (s) { fx(s, { f: 60 + s.F * 0.02, q: 0.8, rep: 3, mood: -3 }); return '他的一些老粉过来关注了你。你有种继承了什么的感觉。'; }],
+      ['私信问他怎么了', function (s) { fx(s, { mood: -6, w: 0.1 }); return '他说：「每天醒来第一件事是看数据，我受不了了。」你看了一眼自己的屏幕使用时间。'; }]
+    ] },
+
+  // ===== 现实生活 =====
+  { id: 'l_boss', title: '老板关注了你', if: function (s) { return s.origin === 'worker' || s.F >= 2000; }, min: 5,
+    t: '新增粉丝里有个名字很眼熟。点进去一看，是你老板。你上周三下午三点发了四条帖子。',
+    o: [
+      ['拉黑他', function (s) { fx(s, { flag: 'boss_block', mood: -2 }); return '你把他拉黑了。'; }],
+      ['改名换头像', function (s) { fx(s, { fp: -0.03 }); return '你换了个马甲。老板的关注列表里现在有一个他不认识的号。'; }],
+      ['无所谓，下班时间的事', function (s) { fx(s, { flag: 'boss_know', mood: 2 }); return '你决定不管。周三下午三点那几条你没删。'; }]
+    ] },
+  { id: 'l_boss2', title: '老板找你谈话', if: function (s) { return since(s, 'boss_block') >= 2 || since(s, 'boss_know') >= 2; }, w: 6,
+    t: '老板把你叫进会议室，把手机屏幕转向你：「解释一下，这是不是你？上班时间发的。」',
+    o: [
+      ['删号保工作', function (s) { fx(s, { end: 'boss' }); return '你当着他的面点了注销。'; }],
+      ['辞职，全职做号', function (s) { s.income = 0; s.enBase = 5; fx(s, { mood: 6, flag: 'fulltime' }); return '你说「那我不干了」。走出大楼的时候腿有点软。从此每回合 5 点精力，没有工资。'; }],
+      ['写检讨，保证不在上班时间发', function (s) { s.enBase = Math.max(3, s.enBase - 1); fx(s, { mood: -8 }); return '你写了八百字检讨。之后每回合精力 -1。'; }]
+    ] },
+  { id: 'l_allnight', title: '熬夜', if: function (s) { return cnt(s, 'video') + cnt(s, 'long') >= 1; },
+    t: '你为了赶一条内容熬到天亮。发出去的那一刻觉得自己很厉害，十分钟后觉得自己要完了。',
+    o: [
+      ['睡一整天', function (s) { fx(s, { en: -1, mood: 4 }); return '你睡到了下午五点。下回合精力 -1。'; }],
+      ['咖啡续命', function (s) { fx(s, { mood: -7 }); return '你喝了三杯咖啡，手在抖，发帖把「的」打成了「地」，被人纠正了。'; }]
+    ] },
+  { id: 'l_family', title: '家人的疑问', min: 4,
+    t: '吃饭的时候，家里人问：「你天天抱着手机，到底在弄什么？」',
+    o: [
+      ['「在做自媒体」', function (s) { fx(s, { mood: -3 }); return '「哦。赚钱吗？」「还没。」「哦。」'; }],
+      ['「在学习」', function (s) { fx(s, { mood: 1 }); return '他们很欣慰。你看的是别人吵架。'; }],
+      ['给他们看你的主页', function (s) { if (s.F >= 5000) { fx(s, { mood: 8 }); return '「这么多人看你啊？」那天晚上你爸给你夹了块肉。'; } fx(s, { mood: -5 }); return '「一百来个人？那不就是你同学吗。」'; }]
+    ] },
+  { id: 'l_date', title: '对面的人', min: 6,
+    t: '一起吃饭的人放下筷子：「你能不能把手机放下？你从坐下到现在回了二十条评论。」',
+    o: [
+      ['把手机扣在桌上', function (s) { fx(s, { mood: 10, en: -1 }); return '那顿饭吃了两个小时，你没看手机。下回合精力 -1，但你觉得挺好。'; }],
+      ['「就回最后一条」', function (s) { fx(s, { rep: 2, mood: -8 }); return '你回完抬头，对面已经在看自己的手机了。'; }]
+    ] },
+  { id: 'l_phone', title: '手机', t: '你边走边刷数据，手机掉在地上，屏幕裂成了一张蜘蛛网。',
+    o: [
+      ['修', function (s) { fx(s, { money: -350 }); return '换屏 350 块。'; }, function (s) { return s.money >= 350; }, '钱不够'],
+      ['凑合用', function (s) { fx(s, { mood: -4, en: -1 }); return '你隔着裂纹打字，错别字多了一倍。下回合精力 -1。'; }]
+    ] },
+  { id: 'l_sick', title: '生病', min: 5, t: '你发烧了，38 度 5。躺在床上，手机就在枕头边。',
+    o: [
+      ['休息，不看手机', function (s) { fx(s, { en: -2, mood: 5 }); return '你躺了三天。没有任何人问你为什么没更新。下回合精力 -2。'; }],
+      ['带病更新', function (s) { fx(s, { mood: -10, w: 0.1 }); return '你发了一条「发烧也在更新」，有人回：「没人逼你。」'; }]
+    ] },
+  { id: 'l_party', title: '朋友聚会', min: 8, t: '朋友聚会。有人问：「听说你在做博主？赚到钱了吗？」一桌人都看向你。',
+    o: [
+      ['如实说', function (s) { fx(s, { mood: s.st.earned >= 2000 ? 6 : -6 }); return s.st.earned >= 2000 ? '你说了个数字。桌上安静了一下，有人开始问怎么做。' : '你说「还在积累」。有人说「挺好的，就当个爱好」。'; }],
+      ['往大了说', function (s) { fx(s, { mood: 3, rep: -1 }); return '你把浏览量说成了粉丝数。当晚有两个朋友关注了你，看到了真实数字。'; }],
+      ['岔开话题', function (s) { fx(s, { mood: -2 }); return '你问服务员能不能加个菜。'; }]
+    ] },
+  { id: 'l_4am', title: '凌晨四点', min: 3, rep: true, w: 0.7,
+    t: '凌晨四点，你醒了，下意识摸到手机，打开后台看数据。和睡前相比，多了 3 个浏览。',
+    o: [
+      ['既然醒了，发一条', function (s) { if (chance(s, 0.2)) { fx(s, { f: 150 + reachOf(s) * 0.8, q: 0.5, mood: 8 }); return '你随手发的那句话，被另一批凌晨四点没睡的人看到了。早上醒来通知栏是满的。'; } fx(s, { mood: -4, f: 3 }); return '你发了一句话。到早上有 2 个赞，都是机器人。'; }],
+      ['把手机扔到房间另一头', function (s) { fx(s, { mood: 6 }); return '你又睡着了。早上数据也没什么变化。'; }]
+    ] },
+  { id: 'l_rent', title: '房租', if: function (s) { return s.origin === 'jobless' || has(s, 'fulltime'); }, min: 6,
+    t: '房东发来消息：「下个季度起房租涨 300，不接受的话月底搬。」',
+    o: [
+      ['接受', function (s) { s.income -= 130; fx(s, { mood: -5 }); return '你回了「好的」。之后每回合支出多 130。'; }],
+      ['搬去更远的地方', function (s) { fx(s, { money: -500, en: -2, mood: -4 }); return '搬家花了 500 和三天时间。下回合精力 -2。'; }]
+    ] },
+  { id: 'l_offer', title: '一份工作', if: function (s) { return s.origin === 'jobless' || has(s, 'fulltime'); }, min: 14,
+    t: '之前投的一份简历有了回音，对方让你下周入职。朝九晚六，工资还行。',
+    o: [
+      ['去上班', function (s) { s.income = 400; s.enBase = 4; fx(s, { mood: 8, flag: 'gotjob' }); return '你入职了。每回合进账 400，精力回到 4 点。同事不知道你有个号。'; }],
+      ['拒了，再拼一把', function (s) { fx(s, { mood: -3, w: 0.1 }); return '你回了「感谢，暂不考虑」。发送之后盯着屏幕看了很久。'; }]
+    ] },
+  { id: 'l_neck', title: '颈椎', min: 10, t: '你的脖子已经疼了一个星期。医生看了片子，问你每天看几个小时手机。',
+    o: [
+      ['说实话', function (s) { fx(s, { money: -200, en: -1, mood: 2 }); return '医生沉默了一下，开了理疗。200 块，下回合精力 -1。'; }],
+      ['「没多久」', function (s) { fx(s, { mood: -5 }); return '医生说那不应该啊。你也说不应该啊。'; }]
+    ] },
+  { id: 'l_birthday', title: '生日', min: 5, t: '今天你生日。你发了一条帖子说这件事。',
+    o: [
+      ['等着看有多少人祝福', function (s) { if (s.F >= 3000) { fx(s, { mood: 8 }); return '有两百多条「生日快乐」。你一条条点了赞。'; } fx(s, { mood: -7 }); return '3 个赞。其中一个是卖蛋糕的广告号。'; }],
+      ['发完就去吃饭', function (s) { fx(s, { mood: 6 }); return '你吃了碗面，加了个蛋。回来看手机，也没什么。'; }]
+    ] },
+  { id: 'l_meetup', title: '线下聚会', if: function (s) { return s.F >= 800; }, min: 8,
+    t: '同城博主线下聚会，AA 两百。群里说「来的都是大佬」。',
+    o: [
+      ['去', function (s) { fx(s, { money: -200, w: 0.25, mood: 3 }); return '到场十二个人，互相扫了一圈码。有个人讲的冷启动方法你回去试了，有用。'; }, function (s) { return s.money >= 200; }, '钱不够'],
+      ['不去', function (s) { return '你看了他们发的合照。每个人都比头像老一点。'; }]
+    ] },
+  { id: 'l_screen', title: '屏幕使用时间', min: 6, t: '手机弹出每周报告：你上周日均使用 11 小时 42 分，其中 X 占了 9 小时。',
+    o: [
+      ['设个使用限额', function (s) { fx(s, { mood: 5, en: -1 }); return '你设了每天 3 小时的限额，第二天点了 6 次「忽略限额」。下回合精力 -1。'; }],
+      ['关掉这个报告', function (s) { fx(s, { mood: -2 }); return '你把通知关了。问题解决了。'; }]
+    ] },
+
+  // ===== 爆款之后 =====
+  { id: 'x_after', title: '爆了之后', if: function (s) { return since(s, 'viral') === 1; }, w: 8, rep: true,
+    t: '你那条帖子爆了。通知栏刷不过来，评论区来了一大群不认识的人，其中一半在吵架。',
+    o: [
+      ['趁热发续集', function (s) { fx(s, { f: 100 + reachOf(s) * 0.5, q: 0.5 }); return '续集的数据是上一条的二十分之一。来的人看了一眼就走了。'; }],
+      ['在爆款下面挂自己的链接', function (s) { fx(s, { f: 150 + reachOf(s) * 0.6, q: 0.3, risk: 6, rk: 'other', rep: -2 }); return '你在评论区挂了「更多内容看主页」，还挂了个群。平台不太喜欢站外链接。'; }],
+      ['什么都不做，正常发', function (s) { fx(s, { mood: -3, w: 0.1 }); return '下一条帖子的数据回到了原来的水平，好像什么都没发生过。'; }]
+    ] },
+  { id: 'x_back', title: '打回原形', if: function (s) { return since(s, 'viral') === 2; }, w: 6, rep: true,
+    t: '爆款过去一周了。你新发的帖子，浏览量和爆之前一模一样。你盯着后台，怀疑自己被限流了。',
+    o: [
+      ['发帖问：「我是不是被限流了」', function (s) { fx(s, { mood: -4, rep: -1 }); return '有人回复：「没有，你本来就这样。」'; }],
+      ['删了重发一遍', function (s) { fx(s, { mood: -5, risk: 2, rk: 'other' }); return '重发的那条，浏览更低了。'; }],
+      ['接受现实', function (s) { fx(s, { mood: 4, w: 0.1 }); return '你关掉后台，开始写下一条。'; }]
+    ] },
+  { id: 'x_meme', title: '成了梗图', if: function (s) { return s.st.virals >= 1 && s.F >= 1000; },
+    t: '你的一句话被人做成了梗图，到处都在转。图上没有你的名字。',
+    o: [
+      ['到处回复「这是我说的」', function (s) { fx(s, { f: 80 + reachOf(s) * 0.3, q: 0.5, rep: -3 }); return '你认领了十几次。有人回：「所以呢？」'; }],
+      ['自己也转一下', function (s) { fx(s, { f: 60 + reachOf(s) * 0.3, q: 0.6, mood: 5 }); return '你转了那张图，配文「谁说的，真有道理」。懂的人笑了。'; }]
+    ] },
+  { id: 'x_comments', title: '评论区战场', if: function (s) { return s.st.virals >= 1; },
+    t: '你一条帖子的评论区吵起来了，两拨人已经从你的观点吵到了对方的学历。',
+    o: [
+      ['下场拉架', function (s) { fx(s, { mood: -6, rep: 1 }); return '两拨人停了一秒，然后一起骂你。'; }],
+      ['关评论', function (s) { fx(s, { rep: -2 }); return '他们转移到了引用里继续吵。'; }],
+      ['看着，不说话', function (s) { fx(s, { f: 60 + reachOf(s) * 0.3, q: 0.3 }); return '吵架带来的数据很好。你心情复杂地看着涨粉通知。'; }]
+    ] },
+
+  // ===== 赛道专属 =====
+  { id: 'n_ai_launch', title: '新模型发布', if: function (s) { return N(s, 'ai'); }, rep: true, w: 1.5,
+    t: '凌晨两点，一家大厂突然发布了新模型。时间线上已经有人在发「一手实测」，距离发布过去了四分钟。',
+    o: [
+      ['熬夜测，抢首发', function (s) { fx(s, { en: -1 }); if (chance(s, 0.45)) { fx(s, { f: 300 + reachOf(s) * 1.6, q: 0.7, mood: 8 }); return '你是中文区前十个发实测的人。早上起来涨了一大波粉。下回合精力 -1。'; } fx(s, { mood: -6 }); return '你测到四点发出去，发现已经有三百条一样的了。下回合精力 -1。'; }],
+      ['等别人测完，写总结', function (s) { fx(s, { f: 60 + reachOf(s) * 0.4, q: 0.8 }); return '你汇总了别人的实测，标注了来源。数据平稳，没人骂你。'; }],
+      ['发一条「又来？」', function (s) { fx(s, { f: 20 + reachOf(s) * 0.15, q: 0.5, mood: 3 }); return '这条共鸣不少。大家都很累。'; }]
+    ] },
+  { id: 'n_ai_dead', title: '工具收费了', if: function (s) { return N(s, 'ai') && cnt(s, 'tut') >= 1; },
+    t: '你教程里推荐的那个免费工具，今天开始收费了，每月 20 美元。你的教程标题是「永久免费」。',
+    o: [
+      ['更新教程，换一个工具', function (s) { fx(s, { en: -1, rep: 5 }); return '你重写了一遍。新推荐的那个工具，下个月也开始收费了。下回合精力 -1。'; }],
+      ['不管了', function (s) { fx(s, { rep: -4 }); return '评论区陆续有人来说「骗子」。'; }]
+    ] },
+  { id: 'n_money_fake', title: '收入截图', if: function (s) { return N(s, 'money'); },
+    t: '同行教你一招：「收入截图不用真的，改个数字而已，谁会去查。」他给你发了个模板。',
+    o: [
+      ['用', function (s) { fx(s, { f: 200 + reachOf(s), q: 0.4, flag: 'fakeshot' }); return '你发了一张「本月收入」截图。数据非常好，私信全是问怎么做到的。'; }],
+      ['发真实的', function (s) { fx(s, { f: 40 + reachOf(s) * 0.3, q: 0.9, rep: 6 }); return '你发了真实收入：' + Math.max(0, Math.round(s.st.earned)) + ' 块。有人说「终于看到一个真的」。'; }],
+      ['不发', function (s) { return '你没发。同行的那张截图有三万赞。'; }]
+    ] },
+  { id: 'n_money_fake2', title: '截图被扒', if: function (s) { return since(s, 'fakeshot') >= 3; }, w: 6,
+    t: '有人把你那张收入截图放大了看：数字的字体和其他地方不一样。帖子已经被转了几千次。',
+    o: [
+      ['承认并道歉', function (s) { fx(s, { rep: -12, fp: -0.08, mood: -10 }); return '你道歉了。掉了一批粉，但没掉光。'; }],
+      ['「截图压缩导致的」', function (s) { fx(s, { rep: -22, fp: -0.12, risk: 8, rk: 'fight', mood: -6 }); return '有人贴出了那个模板的下载链接。'; }]
+    ] },
+  { id: 'n_money_student', title: '学员反馈', if: function (s) { return N(s, 'money') && s.F >= 1500; },
+    t: '私信：「我照你说的方法做了两个月，亏了三千。你说的那些，你自己真的做过吗？」',
+    o: [
+      ['认真帮他复盘', function (s) { fx(s, { en: -1, rep: 5, mood: -3 }); return '你发现他确实是照你说的做的。问题出在你说的。下回合精力 -1。'; }],
+      ['「执行力的问题」', function (s) { fx(s, { rep: -6 }); return '他把聊天记录发了出来。'; }],
+      ['不回', function (s) { fx(s, { mood: -4 }); return '已读。你那天没发帖。'; }]
+    ] },
+  { id: 'n_coin_shill', title: '项目方找你', if: function (s) { return N(s, 'coin') && s.F >= 800; }, w: 2,
+    t: '一个新项目的人找你：「给你一批代币，帮我们发三条。涨上去大家都有钱赚。」白皮书你看了，一共四页，有两页是图。',
+    o: [
+      ['发，拿了代币就卖', function (s) { var m = 500 + Math.round(s.F * 0.15); fx(s, { money: m, risk: 14, rk: 'shill', rep: -8, flag: 'shilled' }); return '你发了三条「个人看好」，代币到手当天就卖了，' + fmt(m) + ' 块。'; }],
+      ['发，而且自己也买点', function (s) { fx(s, { money: -Math.min(Math.max(s.money, 0), 1500), risk: 14, rk: 'shill', rep: -6, flag: 'shilled', }); s.fl.believed = s.turn; return '你觉得这次可能是真的，把手头的钱也投了进去。'; }],
+      ['不发', function (s) { fx(s, { rep: 3 }); return '你拒绝了。那个币后来涨了十倍，再后来的事你等等就知道了。'; }]
+    ] },
+  { id: 'n_coin_zero', title: '归零', if: function (s) { return since(s, 'shilled') >= 3; }, w: 8,
+    t: '你喊过的那个项目，官网打不开了，群也解散了。K 线是一根垂直的线。',
+    o: [
+      ['看看账户', function (s) {
+        if (has(s, 'believed')) { fx(s, { end: 'believed' }); return '你自己买的那部分也在里面。'; }
+        fx(s, { fp: -0.1, rep: -15, mood: -8, risk: 10, rk: 'shill' }); return '你早就卖了。跟着你买的人没卖。你的评论区和私信现在不太能看。';
+      }]
+    ] },
+  { id: 'n_coin_dump', title: '行情暴跌', if: function (s) { return N(s, 'coin'); }, rep: true, w: 0.8,
+    t: '一夜之间跌了 30%。你上周刚发过「这个位置闭眼买」。',
+    o: [
+      ['装没发过，今天不上线', function (s) { fx(s, { rep: -4, mood: -4 }); return '你关了通知。评论区有人每隔一小时来问一次「老师还在吗」。'; }],
+      ['「技术性回调，不改变趋势」', function (s) { fx(s, { rep: -6, f: 30 + s.F * 0.01, q: 0.3 }); return '有人信了。这让你更不安了。'; }],
+      ['承认看错了', function (s) { fx(s, { rep: 6, fp: -0.03, mood: -3 }); return '你发了「我错了」。掉了点粉，但留下来的人说很少见喊单的认错。'; }]
+    ] },
+  { id: 'n_lewd_steal', title: '照片被盗', if: function (s) { return N(s, 'lewd') && s.F >= 1000; },
+    t: '有七个账号在用你的照片引流，其中一个粉丝比你还多，简介写着「本人，其他都是高仿」。',
+    o: [
+      ['发帖声明', function (s) { fx(s, { rep: 2, mood: -5 }); return '你发了声明。评论区有人问：「那你怎么证明你是本人？」'; }],
+      ['加水印', function (s) { fx(s, { rep: 1 }); return '你加了水印。他们把水印裁掉的速度比你加的速度快。'; }]
+    ] },
+  { id: 'n_lewd_crack', title: '平台整治', if: function (s) { return N(s, 'lewd'); }, min: 6,
+    t: '平台宣布整治「低质擦边内容」。你这个赛道已经有人被封了，名单还在变长。',
+    o: [
+      ['转型，换个赛道的内容穿插着发', function (s) { fx(s, { risk: -20, fp: -0.1 }); return '你发了两天读书笔记。掉了一批粉，他们不是来看读书笔记的。'; }],
+      ['顶风继续', function (s) { fx(s, { risk: 15, rk: 'lewd', f: s.F * 0.08, q: 0.2 }); return '别人不敢发的时候，你的数据格外好。'; }],
+      ['停更观望', function (s) { fx(s, { risk: -10, en: -2 }); return '你停了几天。下回合精力 -2。'; }]
+    ] },
+  { id: 'n_repost_owner', title: '原作者来了', if: function (s) { return cnt(s, 'repost') >= 2; }, w: 2,
+    t: '你搬的一条内容，原作者找上门了。他不会中文，用翻译软件发来一句：「这是我的作品，请你删除或者标注。」',
+    o: [
+      ['道歉，补上署名', function (s) { fx(s, { rep: 5, risk: -4 }); return '你补了署名和链接。他回了个「谢谢」，还转发了你的帖子。'; }],
+      ['删帖，当没发生', function (s) { fx(s, { rep: -3, risk: 3, rk: 'repost' }); return '你删了。他已经提交了版权投诉。'; }],
+      ['拉黑他', function (s) { fx(s, { rep: -8, risk: 14, rk: 'repost' }); return '你把他拉黑了。他有四十万粉丝，发了一条关于你的帖子。'; }]
+    ] },
+  { id: 'n_repost_fake', title: '搬了条假的', if: function (s) { return cnt(s, 'repost') >= 3; },
+    t: '你昨天搬的那条「外网重磅消息」，被证实是假的。原帖是个讽刺账号，简介里写了「本号内容均为虚构」。',
+    o: [
+      ['删帖道歉', function (s) { fx(s, { rep: -3, mood: -4 }); return '你删了。那条假消息已经被别人从你这再搬了两轮。'; }],
+      ['改成「网传，待核实」', function (s) { fx(s, { rep: -7, risk: 5, rk: 'repost' }); return '你编辑了帖子。编辑记录所有人都能看到。'; }]
+    ] },
+  { id: 'n_soup_book', title: '金句出处', if: function (s) { return N(s, 'soup') && s.st.posts >= 5; },
+    t: '有人发现你那条两万赞的金句，出自一本 2009 年出版的书，一字不差。',
+    o: [
+      ['补上出处', function (s) { fx(s, { rep: 2, mood: -3 }); return '你在评论区补了书名。这条评论有 4 个赞。'; }],
+      ['「英雄所见略同」', function (s) { fx(s, { rep: -8, fp: -0.03 }); return '有人贴出了那本书的第 47 页。'; }],
+      ['不回应，继续发', function (s) { fx(s, { rep: -4 }); return '你下一条金句下面，第一条评论是「这句又是哪本书的」。'; }]
+    ] },
+  { id: 'n_soup_night', title: '深夜私信', if: function (s) { return N(s, 'soup') && s.F >= 500; },
+    t: '凌晨两点，一个粉丝给你发了很长的私信，讲了他这一年的事。最后一句是：「你说的那些话，是真的吗？」',
+    o: [
+      ['陪他聊到天亮', function (s) { fx(s, { en: -1, rep: 6, mood: -3 }); return '你们聊了三个小时。你没说什么金句，只是听着。下回合精力 -1。'; }],
+      ['回一句金句', function (s) { fx(s, { mood: -6 }); return '你回了一句你自己帖子里的话。他回：「嗯。」你一晚上没睡好。'; }],
+      ['建议他找专业的人聊聊', function (s) { fx(s, { rep: 3, mood: -1 }); return '你把能找到的求助渠道发给了他。第二天他说去了。'; }]
+    ] },
+  { id: 'n_shop_sample', title: '样品', if: function (s) { return N(s, 'shop') && s.F >= 500; },
+    t: '品牌寄来了样品，附了一张卡片：「期待您的真实评价（附件为可用评价方向）。」附件里一共五个方向，都是优点。',
+    o: [
+      ['按附件写', function (s) { var m = 150 + Math.round(s.F * 0.02); fx(s, { money: m, rep: -6 }); return '稿费 ' + m + ' 块。产品你用了一次。'; }],
+      ['写真实体验', function (s) { fx(s, { rep: 7, mood: 2 }); return '你写了三个缺点。品牌没再联系你，但那条帖子很多人收藏。'; }]
+    ] },
+  { id: 'n_shop_law', title: '律师函', if: function (s) { return N(s, 'shop') && s.rep >= 55 && s.F >= 2000; },
+    t: '你给了一个产品差评，厂家发来律师函，要求删帖道歉并赔偿「商誉损失」。',
+    o: [
+      ['把律师函发出来', function (s) { fx(s, { f: 400 + reachOf(s) * 1.5, q: 0.8, rep: 10, mood: -4 }); return '全网都来看这封律师函了。厂家第二天撤回了它，并且删了官方账号的评论区。'; }],
+      ['删帖', function (s) { fx(s, { rep: -6, mood: -6 }); return '你删了。有粉丝问那条测评去哪了，你没回。'; }]
+    ] },
+  { id: 'n_life_cat', title: '一张猫图', if: function (s) { return N(s, 'life'); },
+    t: '你随手拍的楼下那只猫，莫名其妙被转了几万次。没人在意你是谁，大家只问猫叫什么。',
+    o: [
+      ['从此只发猫', function (s) { fx(s, { f: 800 + reachOf(s) * 2, q: 0.5, mood: 6, flag: 'catacc' }); return '你成了一个猫账号。粉丝涨得很快，他们管你叫「铲屎的」。'; }],
+      ['照常发自己的生活', function (s) { fx(s, { f: 200 + reachOf(s) * 0.5, q: 0.4, mood: 2 }); return '冲着猫来的人发现你的生活没有猫好看，陆续走了。'; }]
+    ] },
+  { id: 'n_life_neighbor', title: '邻居', if: function (s) { return N(s, 'life') && s.st.posts >= 6; },
+    t: '电梯里，邻居突然说：「我刷到你了。你上周是不是发帖说我们家装修吵？」',
+    o: [
+      ['承认', function (s) { fx(s, { mood: -3 }); return '他说：「确实吵，不好意思。」然后关注了你。你现在发帖要多想一层。'; }],
+      ['「你认错了吧」', function (s) { fx(s, { mood: -5 }); return '他给你那条帖子点了个赞。'; }]
+    ] },
+
+  // ===== 其它通用 =====
+  { id: 'g_first100', title: '100 粉', if: function (s) { return s.F >= 100 && s.F < 400; }, max: 14,
+    t: '你有 100 个粉丝了。你数了一下，其中认识的有 9 个，机器人大概 30 个。',
+    o: [
+      ['发帖庆祝', function (s) { fx(s, { mood: 8 }); return '你发了「感谢 100 粉」。有个十万粉的账号回复你：「加油。」你高兴了一整天。'; }],
+      ['没什么好庆祝的', function (s) { fx(s, { mood: 2, w: 0.05 }); return '你接着写下一条了。'; }]
+    ] },
+  { id: 'g_1k', title: '1000 粉', if: function (s) { return s.F >= 1000 && s.F < 3000; },
+    t: '粉丝过千了。你把简介改了三遍，最后加上了「合作请私信」。',
+    o: [
+      ['等合作来', function (s) { fx(s, { mood: 5 }); return '一周内来了四条私信，都是卖粉丝的。'; }],
+      ['把这句删了', function (s) { fx(s, { mood: 2, rep: 1 }); return '你又删了。还是内容要紧。'; }]
+    ] },
+  { id: 'g_10k', title: '一万粉', if: function (s) { return s.F >= 10000 && s.F < 30000; },
+    t: '一万粉了。你以为会有什么不一样，结果醒来还是要自己煮面。',
+    o: [
+      ['发一条复盘', function (s) { fx(s, { f: 200 + reachOf(s) * 0.5, q: 0.8, mood: 6 }); return '你写了「从 0 到 1 万粉我做对了什么」。其实你也不确定是哪件事做对了。'; }],
+      ['低调', function (s) { fx(s, { mood: 4, rep: 2 }); return '你什么都没发。但你把后台截了个图，存了起来。'; }]
+    ] },
+  { id: 'g_blue_up', title: '蓝标涨价', if: function (s) { return s.blue > 0; },
+    t: '平台通知：蓝标订阅下期起涨价。理由是「为了给创作者提供更好的服务」。',
+    o: [
+      ['继续订', function (s) { fx(s, { money: -40, mood: -2 }); return '你多付了 40 块。服务没什么变化。'; }],
+      ['取消订阅', function (s) { s.blue = 0; fx(s, { mood: 2 }); return '你取消了。蓝标消失的那一刻，你觉得自己说话都没底气了。'; }]
+    ] },
+  { id: 'g_typo', title: '错别字', if: function (s) { return s.st.posts >= 3; },
+    t: '你数据最好的那条帖子里有个错别字。X 不能编辑没开蓝标的帖子。已经有四十个人指出来了。',
+    o: [
+      ['删了重发', function (s) { fx(s, { mood: -5 }); return '重发的那条没有错别字，也没有人看。'; }],
+      ['留着', function (s) { fx(s, { f: 20 + s.F * 0.01, q: 0.5 }); return '纠正错别字的评论让这条帖子的互动数据更好了。'; }]
+    ] },
+  { id: 'g_draft', title: '草稿箱', min: 8, if: function (s) { return s.st.posts >= 8; },
+    t: '你的草稿箱里有 47 条没发出去的帖子。最早的一条写于注册当天：「这次我要认真做。」',
+    o: [
+      ['挑几条发了', function (s) { fx(s, { f: 30 + reachOf(s) * 0.2, q: 0.7, mood: 3 }); return '有一条三周前写的，现在发出来刚好对上了热点。'; }],
+      ['全删了', function (s) { fx(s, { mood: 4 }); return '清空的那一刻你轻松了不少。'; }]
+    ] },
+  { id: 'g_compare', title: '数据焦虑', min: 6, rep: true, w: 0.6,
+    t: '你发了一条自己很满意的帖子，一小时了，3 个赞。你已经刷新了五十多次。',
+    o: [
+      ['删掉', function (s) { fx(s, { mood: -5 }); return '你删了。删完又有点后悔。'; }],
+      ['用小号给自己点个赞', function (s) { fx(s, { mood: -2 }); return '4 个赞了。'; }],
+      ['关掉手机去做别的', function (s) { fx(s, { mood: 5 }); return '晚上回来看，27 个赞。也行。'; }]
+    ] },
+  { id: 'g_template', title: '爆款模板', min: 4,
+    t: '你刷到一条帖子：「我分析了 1000 条爆款，总结出 7 个模板，照着写必火。」这条帖子本身用的是第 3 个模板。',
+    o: [
+      ['照着写', function (s) { fx(s, { f: 40 + reachOf(s) * 0.3, q: 0.4, rep: -2 }); return '数据确实好了一点。评论区有人说：「怎么现在人人说话都一个味。」'; }],
+      ['不用，写自己的', function (s) { fx(s, { rep: 2, w: 0.08 }); return '你照自己的写法写。慢一点，但认得出是你。'; }]
+    ] },
+  { id: 'g_dm_scam', title: '「官方」私信', t: '私信：「【X 官方】您的账号存在版权违规，请在 24 小时内点击链接完成验证，否则将永久停用。」发信人的蓝标是贴在头像上的。',
+    o: [
+      ['点链接', function (s) { fx(s, { fp: -0.08, mood: -12, risk: 10, rk: 'other' }); return '你输了密码。接下来的六个小时，你的账号在发卖币广告。'; }],
+      ['举报并拉黑', function (s) { fx(s, { mood: 2 }); return '你举报了。平台回复：「未发现违规。」'; }]
+    ] },
+  { id: 'g_interview', title: '采访', if: function (s) { return s.F >= 20000; },
+    t: '一个做播客的人想采访你，主题是「普通人如何在 X 上做起来」。',
+    o: [
+      ['去，说实话', function (s) { fx(s, { f: 300 + reachOf(s) * 0.4, q: 0.9, rep: 6, mood: 5 }); return '你说了「大部分是运气和时间」。主持人愣了一下，但这期成了他播放最高的一期。'; }],
+      ['去，讲方法论', function (s) { fx(s, { f: 300 + reachOf(s) * 0.5, q: 0.6, rep: -2 }); return '你讲了一套「三步模型」。那是你前一晚现编的。'; }]
+    ] },
+  { id: 'g_weekend', title: '周末', min: 3, rep: true, w: 0.5,
+    t: '周末，天气很好。朋友叫你出去。你今天本来打算写一篇东西。',
+    o: [
+      ['出去', function (s) { fx(s, { mood: 10, en: -1 }); return '你出去玩了一天，一条帖子都没发。下回合精力 -1。'; }],
+      ['留下来写', function (s) { fx(s, { mood: -4, en: 1 }); return '你写了一下午。下回合精力 +1。朋友发的合照里少了你。'; }]
+    ] }
+];
+
+// 结局与成就。
+// 立即结局（没有 when）由 endGame() 直接触发；回合打满后的结局按顺序匹配第一个 when 为真的。
+// q 是战绩卡上的一句话，hidden 表示图鉴里不提示条件。
+
+function share(s, list) { var n = 0; list.forEach(function (id) { n += cnt(s, id); }); return s.st.acts ? n / s.st.acts : 0; }
+
+var ENDINGS = [
+  // ----- 立即结局 -----
+  { id: 'ban_buy', t: '僵尸号主', q: '粉丝是买的，封号是送的。',
+    d: '你的账号被永久停用，理由是「操纵平台数据」。你买来的那些粉丝，没有一个来问你去哪了。' },
+  { id: 'ban_repost', t: '搬运工的尽头', q: '搬了一路，最后把自己搬没了。',
+    d: '版权投诉攒够了数。账号被永久停用。你发过的内容都还在网上，在它们原作者的主页里。' },
+  { id: 'ban_lewd', t: '擦过了', q: '离封号永远只差一张图。这张就是。',
+    d: '「您的账号因违反敏感内容政策已被永久停用。」你的粉丝在三个高仿号之间重新分配了。' },
+  { id: 'ban_shill', t: '喊进去了', q: '非投资建议。非常不建议。',
+    d: '账号因「推广金融骗局」被永久停用。跟过你单的人建了个维权群，群名是你的 ID。' },
+  { id: 'ban_fight', t: '吵赢了，号没了', q: '每一场架都赢了。裁判是平台。',
+    d: '举报攒够了数，账号因「骚扰行为」被永久停用。你最后一条帖子是「我就不信了」。' },
+  { id: 'ban_other', t: '不知道为什么，反正封了', q: '申诉理由那一栏，我填的是「？」。',
+    d: '账号被永久停用。邮件里说你「违反了平台规则」。你把规则从头到尾读了一遍，还是不知道是哪条。' },
+  { id: 'quit', t: '心态归零', q: '卸载的那一刻，世界安静了。',
+    d: function (s) { return '第 ' + days(s) + ' 天，你长按图标，点了卸载。没有发告别帖，因为你估算了一下那条帖子的点赞数。' + (s.F >= 5000 ? '你的 ' + fmt(s.F) + ' 个粉丝里，有几个过了很久才发现你不更新了。' : ''); } },
+  { id: 'broke', t: '为爱发电，电费欠了两千', q: '投入产出比：算不出来，分母是负的。',
+    d: '买粉、抽奖、蓝标、换手机屏。你打开账单算了一下这个号一共花了多少钱，然后把账单关了，把 App 也关了。' },
+  { id: 'mcn', t: '签了', q: '号还在，只是不是我的了。',
+    d: '签约之后，你的号有了专人运营。第二周你发现自己登不上去了。现在那个号每天发六条带货，用的还是你的头像。' },
+  { id: 'sold', t: '卖了', q: '起号是为了什么？为了这一下。',
+    d: function (s) { return '第 ' + days(s) + ' 天，你把号卖了。买家改了名字，开始发你看不懂的东西。你注册了一个新号，0 关注，0 粉丝，头像是个灰色的蛋。'; } },
+  { id: 'boss', t: '老板发现了', q: '注销账号的时候，老板就站在旁边。',
+    d: '你当着老板的面注销了账号。回到工位上，你打开 X 的注册页面看了十秒，然后关掉，打开了周报。' },
+  { id: 'believed', t: '自己信了', q: '喊单的最高境界，是把自己喊进去。',
+    d: '你喊的那个币归零了，你自己买的那份也在里面。你是这个项目里唯一一个既拿了推广费又亏了本金的人。' },
+
+  // ----- 回合打满：隐藏与特殊优先 -----
+  { id: 'lurker', hidden: true, t: '92 天潜水员', q: '一条没发。零差评。',
+    when: function (s) { return s.st.posts === 0 && share(s, ['rest']) < 0.45 && share(s, ['replyv']) < 0.4; },
+    d: '92 天，你一条帖子都没发。你看完了所有人的起号教程，收藏了四百条「干货」，对每个大V的八卦了如指掌。你是这个平台最理想的用户。' },
+  { id: 'phenom', hidden: true, t: '现象级', q: '别问方法。我也想知道。',
+    when: function (s) { return s.F >= 300000; },
+    d: function (s) { return '92 天，' + fmt(s.F) + ' 粉。已经有人开课教「如何复制你的成功」了，讲的那些方法你自己都没听说过。'; } },
+  { id: 'poker', hidden: true, t: '凌晨四点的扑克脸', q: '没买粉，没吵架，没割韭菜。居然也行。',
+    when: function (s) { return s.F >= 100000 && realPct(s) >= 0.7 && s.rep >= 65 && !has(s, 'bought') && !has(s, 'course') && cnt(s, 'fight') === 0; },
+    d: '十万粉，大部分是真人，没有一个是买的。你没挂过人，没卖过课，没发过收入截图。数据涨也好跌也好，你都是同一张脸。凌晨四点，你发完今天的帖子，没看后台，睡了。' },
+  { id: 'bots100k', t: '十万粉，九万是机器人', q: '我的粉丝从不取关，也从不说话。',
+    when: function (s) { return s.F >= 100000 && realPct(s) < 0.3; },
+    d: function (s) { return '你的粉丝数是 ' + fmt(s.F) + '，上一条帖子的浏览是 ' + rint(s, 90, 400) + '。广告主看了一眼你的后台数据，客气地说「我们再考虑一下」。'; } },
+  { id: 'leek100k', t: '镰刀', q: '口碑是什么，能提现吗。',
+    when: function (s) { return s.F >= 100000 && s.rep < 25; },
+    d: function (s) { return '十万粉，赚了 ' + fmt(s.st.earned) + ' 块。你的名字在好几个避雷帖里出现，但每个避雷帖下面都有人问「所以他的课在哪买」。'; } },
+  { id: 'carried', t: '被带飞的', q: '努力很重要。被转发更重要。',
+    when: function (s) { return s.F >= 100000 && s.st.bigv >= 2; },
+    d: '十万粉。你很清楚其中有多少是那几位大V随手一转带来的。你在简介里写的是「坚持输出的力量」。' },
+  { id: 'big100k', t: '十万粉', q: '92 天十万粉。接下来请叫我老师。',
+    when: function (s) { return s.F >= 100000; },
+    d: function (s) { return '92 天，' + fmt(s.F) + ' 粉。开始有人私信叫你老师，问你方法论。你想了想，决定把「发着发着就起来了」包装成一套五步模型。'; } },
+  { id: 'onehit', t: '一条爆款吃了 92 天', q: '我的代表作，也是我唯一的作品。',
+    when: function (s) { return s.st.posts >= 5 && s.st.maxViews >= s.st.totalViews * 0.6 && s.st.maxViews >= 50000 && s.F < 50000; },
+    d: function (s) { return '你有一条帖子拿到了 ' + fmt(s.st.maxViews) + ' 浏览，占了你 92 天总浏览的一大半。之后你发的每一条，评论区都有人说「还是那条好」。那条是你随手发的。'; } },
+  { id: 'smallrich', hidden: true, t: '粉丝没几个，钱是真的', q: '流量是别人的，钱是我的。',
+    when: function (s) { return s.F < 3000 && s.st.earned >= 4000; },
+    d: function (s) { return '你只有 ' + fmt(s.F) + ' 个粉丝，但赚了 ' + fmt(s.st.earned) + ' 块。那些十万粉的博主在研究怎么变现的时候，你在研究怎么报税。'; } },
+  { id: 'rich', t: '闷声发财', q: '粉丝数不方便说，收入更不方便说。',
+    when: function (s) { return s.st.earned >= 60000 && s.rep >= 25; },
+    d: function (s) { return '92 天，账上多了 ' + fmt(s.st.earned) + ' 块。你从来不发收入截图。那些发截图的人，赚的还没你多。'; } },
+  { id: 'catlord', hidden: true, t: '铲屎的', q: '我有十万个粉丝，他们都是来看猫的。',
+    when: function (s) { return has(s, 'catacc') && s.F >= 5000; },
+    d: function (s) { return fmt(s.F) + ' 个人关注了你，为了楼下那只猫。猫不知道这件事。你试过发一条自己的照片，掉了两百个粉。'; } },
+  { id: 'collector', t: '赛道收集者', q: '没有我没做过的赛道，也没有我做起来的赛道。',
+    when: function (s) { return s.st.switches >= 4; },
+    d: function (s) { return '92 天里你换了 ' + s.st.switches + ' 次赛道。每次都是因为看到别人在那个赛道起飞了。你的粉丝已经分不清你到底是干什么的，你自己也是。'; } },
+  { id: 'fighter', t: '全网都认识你', q: '知名度很高。是那种知名度。',
+    when: function (s) { return cnt(s, 'fight') >= 8; },
+    d: function (s) { return '你挂了 ' + cnt(s, 'fight') + ' 次人，号居然还在。现在你发什么都有人看，因为大家想知道今天轮到谁。被你拉黑的人建了个群，已经满了。'; } },
+  { id: 'replyguy', t: '评论区钉子户', q: '我没有主页，大V的评论区就是我的主页。',
+    when: function (s) { return share(s, ['replyv']) >= 0.4; },
+    d: function (s) { return '你回复了 ' + cnt(s, 'replyv') + ' 次大V，比你自己发的帖子还多。很多人眼熟你的头像，没有人记得你的名字。有个大V以为你是他的工作人员。'; } },
+  { id: 'honest_ok', t: '老实人', q: '只会写教程。还真写出来了。',
+    when: function (s) { return s.st.posts >= 12 && s.st.tutLong >= s.st.posts * 0.65 && s.F >= 10000; },
+    d: function (s) { return '92 天，你基本只干了一件事：写教程。没蹭过几次热点，没吵过架。' + fmt(s.F) + ' 个粉丝，评论区最常见的一句话是「收藏了」。他们大概率不会再打开，但他们也不会取关。'; } },
+  { id: 'honest_no', t: '老实人，但没用', q: '内容为王。王还没登基。',
+    when: function (s) { return s.st.posts >= 12 && s.st.tutLong >= s.st.posts * 0.65; },
+    d: function (s) { return '你认认真真写了 ' + s.st.tutLong + ' 篇教程和长文，粉丝 ' + fmt(s.F) + '。所有人都说内容为王。你把这四个字抄在了便利贴上，现在想撕下来。'; } },
+  { id: 'fakegood', t: '数据好看', q: '粉丝数是真的，粉丝不是。',
+    when: function (s) { return has(s, 'bought') && s.F >= 8000 && realPct(s) < 0.45; },
+    d: function (s) { return '你的主页看起来很体面：' + fmt(s.F) + ' 粉丝。只有你自己知道，其中会喘气的不到一半。你已经不太敢开直播了。'; } },
+  { id: 'zen', hidden: true, t: '养生博主', q: '别人在起号，我在起床。',
+    when: function (s) { return share(s, ['rest']) >= 0.45 && s.st.acts >= 20; },
+    d: '92 天里，你有一半的时间在休息。号没怎么涨，但你睡得很好，颈椎没事，朋友聚会一次没落下。从某种标准看，你是这局游戏里唯一的赢家。' },
+  { id: 'appealer', hidden: true, t: '申诉专业户', q: '平台客服比我的粉丝更熟悉我。',
+    when: function (s) { return s.st.freezes >= 3; },
+    d: function (s) { return '你被冻结了 ' + s.st.freezes + ' 次，每次都申诉回来了。你现在写申诉信比写帖子熟练，正在考虑出一个《解封保姆级教程》。'; } },
+  { id: 'paidwork', hidden: true, t: '付费上班', q: '我给平台打工，并且每月交 80 块。',
+    when: function (s) { return s.st.blueTurns >= 19 && s.F < 3000; },
+    d: function (s) { return '你开了 92 天蓝标，每天发帖，粉丝 ' + fmt(s.F) + '。算下来，你是花钱给平台生产内容的。平台对此表示欢迎。'; } },
+  { id: 'happy', hidden: true, t: '发得很开心', q: '没人看。我也没在给人看。',
+    when: function (s) { return s.mood >= 85 && s.F < 3000 && s.st.posts >= 15; },
+    d: '92 天，粉丝没几个，你每天照发。晚霞、猫、泡面、不想上班。没有人教你怎么起号，你也没问。这个号是你自己的。' },
+  { id: 'mid', t: '腰部博主', q: '不上不下，刚好够被叫一声老师。',
+    when: function (s) { return s.F >= 10000; },
+    d: function (s) { return fmt(s.F) + ' 粉。够接一点广告，不够辞职。有人叫你大佬，你每次都要愣一下，才反应过来是在叫你。'; } },
+  { id: 'k1', t: '千粉俱乐部', q: '92 天，四位数。四舍五入也是万粉。',
+    when: function (s) { return s.F >= 1000; },
+    d: function (s) { return '92 天，' + fmt(s.F) + ' 粉。据说大部分人做不到这一步就放弃了。你没有放弃，主要是因为还没想好接下来干什么。'; } },
+  { id: 'friends', t: '朋友圈级影响力', q: '我的粉丝，我基本都能叫出名字。',
+    when: function (s) { return s.F >= 100; },
+    d: function (s) { return fmt(s.F) + ' 个粉丝。其中同学 9 个，同事 3 个，你妈 1 个，剩下的是互关的同行和卖币的机器人。'; } },
+  { id: 'air', t: '对着空气说了 92 天', q: '这 92 天，就当是写日记了。',
+    when: function (s) { return true; },
+    d: function (s) { return '92 天，' + fmt(s.F) + ' 个粉丝。你发的每一条帖子，最忠实的读者是你自己，平均每条看了十四遍。'; } }
+];
+
+var ACHS = [
+  { id: 'a_first', t: '第一条', d: '发出第一条帖子', when: function (s) { return s.st.posts >= 1; } },
+  { id: 'a_viral', t: '爆了', d: '出一条爆款', when: function (s) { return s.st.virals >= 1; } },
+  { id: 'a_viral3', t: '体质特殊', d: '一局出三条爆款', when: function (s) { return s.st.virals >= 3; } },
+  { id: 'a_1k', t: '四位数', d: '粉丝达到 1000', when: function (s) { return s.st.peak >= 1000; } },
+  { id: 'a_10k', t: '万粉', d: '粉丝达到 1 万', when: function (s) { return s.st.peak >= 10000; } },
+  { id: 'a_100k', t: '十万', d: '粉丝达到 10 万', when: function (s) { return s.st.peak >= 100000; } },
+  { id: 'a_flop', t: '三小时，三个赞', d: '长文扑街三次', when: function (s) { return s.st.flops >= 3; } },
+  { id: 'a_money', t: '第一桶金', d: '累计赚到 1 万块', when: function (s) { return s.st.earned >= 10000; } },
+  { id: 'a_clean', t: '洁身自好', d: '打满 92 天，账号风险从没出过事', when: function (s) { return s.endId.indexOf('ban') < 0 && s.turn >= CFG.TURNS && s.st.posts >= 10 && s.st.limitedTurns === 0 && s.st.freezes === 0; } },
+  { id: 'a_limited', t: '我是不是被限流了', d: '累计被限流 5 个回合', when: function (s) { return s.st.limitedTurns >= 5; } },
+  { id: 'a_freeze', t: '解封了', d: '被冻结后申诉回来', when: function (s) { return s.st.freezes >= 1 && s.endId.indexOf('ban') < 0; } },
+  { id: 'a_bigv', t: '翻牌', d: '被大V转发或回复', when: function (s) { return s.st.bigv >= 1; } },
+  { id: 'a_nobuy', t: '一个都没买', d: '不买粉、不进互推群，做到 1 万粉', when: function (s) { return s.st.peak >= 10000 && !has(s, 'bought') && cnt(s, 'group') === 0; } },
+  { id: 'a_allniche', t: '都试试', d: '一局里做过 4 个赛道', when: function (s) { return s.st.niches.length >= 4; } },
+  { id: 'a_video', t: '剪辑入门', d: '做 5 条视频', when: function (s) { return cnt(s, 'video') >= 5; } },
+  { id: 'a_long', t: '码字的', d: '写 6 篇长文', when: function (s) { return cnt(s, 'long') >= 6; } },
+  { id: 'a_rep', t: '好人', d: '结束时口碑不低于 85', when: function (s) { return s.rep >= 85 && s.st.posts >= 10; } },
+  { id: 'a_norep', t: '人设崩塌', d: '口碑掉到 10 以下', when: function (s) { return s.rep < 10; } },
+  { id: 'a_happy', t: '心态很好', d: '结束时心态不低于 90', when: function (s) { return s.mood >= 90 && s.turn >= CFG.TURNS; } },
+  { id: 'a_poor', t: '月光', d: '结束时身上的钱是负数', when: function (s) { return s.money < 0; } },
+  { id: 'a_fast', t: '闪电战', d: '7 个回合内就结束了一局', when: function (s) { return s.ended && s.turn <= 7; } },
+  { id: 'a_cat', t: '猫比我红', d: '被一张猫图带飞', when: function (s) { return has(s, 'catacc'); } },
+  { id: 'a_4am', t: '凌晨四点', d: '一局里在凌晨四点醒来三次', when: function (s) { return (s.seen.l_4am || 0) >= 3; } },
+  { id: 'a_ironfan', t: '柯基头像', d: '没有辜负第一个铁粉', when: function (s) { return (s.seen.f_fan2 || 0) >= 1; } }
+];
+
+// 界面层
+(function () {
+  var AUTHOR = { name: '凌晨4点扑克脸', handle: '4amPokerFace' };
+  var GAME = 'X 起号模拟器';
+  var app = document.getElementById('app');
+  var S = null, tab = 'post', busy = false, lastFid = 0, lastTurn = 0, desk = false;
+  var T = Game.CFG.TURNS, D = Game.CFG.DPT, DAYS = T * D;
+  function dr(turn) { return ((turn - 1) * D + 1) + '–' + turn * D; }
+  var mq = window.matchMedia ? window.matchMedia('(min-width: 1000px)') : null;
+  var GROUPS = [
+    { id: 'post', n: '发帖', a: ['short', 'hot', 'tut', 'long', 'video', 'gift'] },
+    { id: 'wild', n: '野路子', a: ['repost', 'fight', 'group', 'buy', 'lottery'] },
+    { id: 'run', n: '经营', a: ['replyv', 'replyown', 'blue', 'switch', 'rest'] },
+    { id: 'cash', n: '搞钱', a: ['sell', 'ad', 'course'] }
+  ];
+  var SUIT = { ai: '♠︎', money: '♦︎', coin: '♦︎', lewd: '♥︎', repost: '♣︎', soup: '♥︎', shop: '♣︎', life: '♠︎' };
+
+  // ---------- 工具 ----------
+  function esc(t) { return String(t == null ? '' : t).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  function lsGet(k) { try { var v = localStorage.getItem(k); return v ? JSON.parse(v) : null; } catch (e) { return null; } }
+  function lsSet(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+  function lsDel(k) { try { localStorage.removeItem(k); } catch (e) {} }
+  var META = lsGet('xsim_meta') || {};
+  META.endings = META.endings || {}; META.achs = META.achs || {}; META.runs = META.runs || 0; META.best = META.best || 0;
+  function save() { if (S) lsSet('xsim_save', S); }
+  var theme = lsGet('xsim_theme') || 'light';
+  function applyTheme() { document.documentElement.setAttribute('data-theme', theme); var m = document.querySelector('meta[name=theme-color]'); if (m) m.setAttribute('content', theme === 'light' ? '#ffffff' : '#15202b'); }
+  function toggleTheme() { theme = theme === 'light' ? 'dark' : 'light'; lsSet('xsim_theme', theme); applyTheme(); }
+  function themeLabel() { return theme === 'light' ? '切到深色' : '切到浅色'; }
+  applyTheme();
+  function fmt(n) { return Game.fmt(n); }
+  function sign(n, f) { n = Math.round(n); return (n > 0 ? '+' : n < 0 ? '−' : '') + (f ? fmt(Math.abs(n)) : Math.abs(n)); }
+  function cls(n) { return n > 0 ? 'green' : n < 0 ? 'red' : 'muted'; }
+  function toast(t) {
+    var el = document.createElement('div'); el.className = 'toast'; el.textContent = t; app.appendChild(el);
+    setTimeout(function () { if (el.parentNode) el.parentNode.removeChild(el); }, 1800);
+  }
+  function countUp(el, to, ms) {
+    var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduce || !window.requestAnimationFrame) { el.textContent = fmt(to); return; }
+    var t0 = null;
+    function step(t) { if (t0 == null) t0 = t; var p = Math.min(1, (t - t0) / ms); p = 1 - Math.pow(1 - p, 3); el.textContent = fmt(to * p); if (p < 1) requestAnimationFrame(step); }
+    requestAnimationFrame(step);
+  }
+  function pageUrl() { return /^https?:/.test(location.protocol) ? location.href.split('#')[0].split('?')[0] : ''; }
+  function sheet(html) {
+    closeSheet();
+    var m = document.createElement('div'); m.className = 'mask'; m.id = 'mask';
+    m.innerHTML = '<div class="sheet scroll">' + html + '</div>'; app.appendChild(m); return m;
+  }
+  function closeSheet() { var m = document.getElementById('mask'); if (m) m.parentNode.removeChild(m); }
+  function on(root, sel, fn) { Array.prototype.forEach.call(root.querySelectorAll(sel), function (el) { el.addEventListener('click', function (ev) { fn(el, ev); }); }); }
+  function footHtml() {
+    return '<div class="foot">作者 <a href="https://x.com/' + AUTHOR.handle + '" target="_blank" rel="noopener">' + esc(AUTHOR.name) + ' @' + AUTHOR.handle + '</a><br>非官方作品，与 X 公司无关。人物与事件均为虚构。<br>部分数值参考了对一个真实万粉账号的拆解。</div>';
+  }
+
+  // ---------- 首页 ----------
+  function home() {
+    S = null; app.className = ''; undo = [];
+    var sv = lsGet('xsim_save'); var canCont = sv && sv.v === 1 && !sv.done;
+    var got = Object.keys(META.endings).length;
+    app.innerHTML = '<div class="home scroll">' +
+      '<div class="clock"><span>04:00 AM</span><span>DAY 0 / ' + DAYS + '</span></div>' +
+      '<div class="hero">' +
+      '<div class="cards"><div class="pcard back c1"></div><div class="pcard c3 r"><div><b>K</b><i>♥︎</i></div><div class="mid">♥︎</div><div class="bot"><b>K</b><i>♥︎</i></div></div>' +
+      '<div class="pcard c2"><div><b>0</b><i>♠︎</i></div><div class="mid">♠︎</div><div class="bot"><b>0</b><i>♠︎</i></div></div></div>' +
+      '<h1 class="title">X 起号<em>模拟器</em></h1>' +
+      '<p class="tagline">0 粉丝，' + DAYS + ' 天。<br>发帖，蹭热点，被限流，被封号。</p>' +
+      '<button class="btn primary" id="go">开始起号</button>' +
+      (canCont ? '<button class="btn" id="cont">继续上一局（第 ' + sv.turn + ' 回合，' + fmt(sv.F) + ' 粉）</button>' : '') +
+      '<button class="btn small" id="dex">结局图鉴 ' + got + ' / ' + ENDINGS.length + (META.best ? '　最高 ' + fmt(META.best) + ' 粉' : '') + '</button>' +
+      '<button class="btn small" id="theme">' + themeLabel() + '</button>' +
+      '</div>' + footHtml() + '</div>';
+    document.getElementById('theme').onclick = function () { toggleTheme(); home(); };
+    document.getElementById('go').onclick = setup;
+    document.getElementById('dex').onclick = function () { dex(home); };
+    if (canCont) document.getElementById('cont').onclick = function () { S = sv; game(); };
+  }
+
+  // ---------- 开局 ----------
+  function setup() {
+    var niche = null, origin = null; app.className = '';
+    function draw() {
+      app.innerHTML = '<div class="page"><div class="page-h"><h2>注册账号</h2><button class="muted" id="back">返回</button></div>' +
+        '<div class="page-b scroll"><div class="sec">选一个赛道</div><div class="grid2">' +
+        NICHES.map(function (n) { return '<button class="opt' + (niche === n.id ? ' on' : '') + '" data-n="' + n.id + '"><b>' + esc(n.n) + '</b><span>' + esc(n.d) + '</span></button>'; }).join('') +
+        '</div><div class="sec">你是谁</div><div class="list">' +
+        ORIGINS.map(function (o) { return '<button class="opt' + (origin === o.id ? ' on' : '') + '" data-o="' + o.id + '"><b>' + esc(o.n) + '</b><span>' + esc(o.d) + '</span></button>'; }).join('') +
+        '</div></div><div class="page-f"><div class="row"><button class="btn small" id="rand">随便来</button>' +
+        '<button class="btn small primary" id="start"' + (niche && origin ? '' : ' disabled style="opacity:.4"') + '>发第一条帖子</button></div></div></div>';
+      var sc = app.querySelector('.page-b'); sc.scrollTop = draw.top || 0;
+      on(app, '[data-n]', function (el) { niche = el.getAttribute('data-n'); draw.top = sc.scrollTop; draw(); });
+      on(app, '[data-o]', function (el) { origin = el.getAttribute('data-o'); draw.top = sc.scrollTop; draw(); });
+      document.getElementById('back').onclick = home;
+      document.getElementById('rand').onclick = function () {
+        niche = NICHES[Math.floor(Math.random() * NICHES.length)].id; origin = ORIGINS[Math.floor(Math.random() * ORIGINS.length)].id; begin();
+      };
+      document.getElementById('start').onclick = function () { if (niche && origin) begin(); };
+    }
+    function begin() {
+      S = Game.newGame({ niche: niche, origin: origin });
+      say(S, 'sys', '每回合代表 ' + D + ' 天，你有 ' + S.enBase + ' 格精力。选几件事做，然后点「结束这四天」。');
+      save(); game();
+    }
+    draw();
+  }
+
+  // ---------- 游戏主界面 ----------
+  function game() {
+    busy = false; lastFid = 0; lastTurn = 0; desk = !!(mq && mq.matches); app.className = 'game';
+    app.innerHTML = '<div class="bar"><div class="brand"><b>起号模拟器</b></div><div class="me"><div class="ava me">你</div><div><b>你</b><span id="meN"></span></div></div><div class="bar-top"><span id="turn"></span><button class="menu" id="menu">菜单</button></div>' +
+      '<div class="prog"><i id="prog"></i></div><div class="stats">' +
+      '<div class="stat"><small>♠︎ 粉丝</small><b id="sF"></b></div><div class="stat"><small>♥︎ 心态</small><b id="sM"></b></div>' +
+      '<div class="stat"><small>♦︎ 钱</small><b id="sY"></b></div><div class="stat"><small>账号健康</small><b class="txt" id="sH"></b></div></div>' +
+      '<div class="sub" id="sub"></div></div><div class="hot" id="hot"></div>' +
+      '<div class="feed scroll" id="feed"></div><div class="dock" id="dock"></div><aside class="right scroll" id="right"></aside>';
+    document.getElementById('menu').onclick = menu;
+    appendFeed(false); updBar(); updDock();
+    if (S.ended) { ending(); return; }
+    if (S.phase === 'start') beginTurn(); else if (S.ev) showEvent();
+  }
+  function updBar() {
+    var nc = Game.byId(NICHES, S.niche);
+    document.getElementById('turn').textContent = '第 ' + S.turn + ' / ' + T + ' 回合 · 第 ' + dr(S.turn) + ' 天' + (desk ? '' : ' · ' + nc.n);
+    document.getElementById('meN').textContent = Game.byId(ORIGINS, S.origin).n + ' · ' + nc.n;
+    document.getElementById('prog').style.width = Math.round((S.turn - 1) / T * 100) + '%';
+    document.getElementById('sF').textContent = fmt(S.F);
+    var m = document.getElementById('sM'); m.textContent = Math.round(S.mood); m.className = S.mood < 30 ? 'red' : '';
+    var y = document.getElementById('sY'); y.textContent = fmt(S.money); y.className = S.money < 0 ? 'red' : '';
+    var hl = document.getElementById('sH'); hl.textContent = Game.healthLabel(S); hl.className = 'txt ' + (S.risk >= 75 ? 'red' : S.risk >= 25 ? 'gold' : 'green');
+    document.getElementById('sub').innerHTML = '<span>真粉率 ' + Math.round(Game.realPct(S) * 100) + '%</span><span>口碑 ' + Math.round(S.rep) + '</span>' +
+      (S.blue > 0 ? '<span>蓝标剩 ' + S.blue + ' 回合</span>' : '') + (S.income ? '<span>每回合 ' + sign(S.income) + ' 块</span>' : '');
+    var h = Game.byId(HOTS, S.hot);
+    document.getElementById('hot').innerHTML = h ? '这几天的热点：<b>' + esc(h.n) + '</b>' : '还没开始';
+    updRight();
+  }
+  function updRight() {
+    var r = document.getElementById('right'); if (!r) return;
+    var h = Game.byId(HOTS, S.hot), idx = h ? HOTS.indexOf(h) : 0, tr = [];
+    for (var i = 0; i < 4; i++) tr.push(HOTS[(idx + i * 7 + (i ? S.turn : 0)) % HOTS.length]);
+    var cats = { ai: '科技', money: '财经', coin: '加密货币', lewd: '娱乐', repost: '海外', soup: '情感', shop: '数码', life: '生活' };
+    var rv = RIVALS.map(function (x) { return { r: x, st: S.rv[x.id] }; }).sort(function (a, b) { return b.st.F - a.st.F; });
+    var rank = 1; rv.forEach(function (x) { if (!x.st.gone && x.st.F > S.F) rank++; });
+    r.innerHTML = '<div class="box"><h4>正在发生</h4>' + tr.map(function (x, i) {
+      return '<div class="tr"><small>' + (cats[x.tags[0]] || '热门') + ' · ' + (i === 0 ? '这几天的热点' : '趋势') + '</small><b' + (i === 0 ? ' class="red"' : '') + '>' + esc(x.n) + '</b><span>' + fmt(((idx + i * 13 + S.turn * 3) % 90 + 3) * (i === 0 ? 9000 : 1100)) + ' 条帖子</span></div>'; }).join('') + '</div>' +
+      '<div class="box"><h4>同行都多少粉了</h4>' + rv.slice(0, 6).map(function (x) {
+        return '<div class="rv"><div class="ava">' + (SUIT[x.r.niche] || '♣︎') + '</div><div class="rvn"><b>' + esc(x.r.n) + '</b><span>' + esc(x.r.bio) + '</span></div><i>' + (x.st.gone ? '已注销' : fmt(x.st.F)) + '</i></div>'; }).join('') +
+      '<div class="rv you"><div class="ava me">你</div><div class="rvn"><b>你</b><span>在这 11 个人里排第 ' + rank + '</span></div><i>' + fmt(S.F) + '</i></div></div>' + footHtml();
+  }
+  function updDock() {
+    var d = document.getElementById('dock'); if (!d) return;
+    var list = Game.actionList(S), map = {}; list.forEach(function (a) { map[a.id] = a; });
+    var pips = ''; var max = Math.max(S.energy, S.enBase);
+    for (var i = 0; i < max; i++) pips += '<i' + (i < S.energy ? '' : ' class="off"') + '></i>';
+    var q = S.tp.map(function (p) { return Game.PT[p.type].n; });
+    var g = GROUPS.filter(function (x) { return x.id === tab; })[0];
+    d.innerHTML = '<div class="dock-top"><div class="pips" title="精力"><span>精力</span>' + pips + '</div>' +
+      '<div class="queue">' + (q.length ? '待发布：' + q.join('、') : (S.energy > 0 ? '精力用来做下面的事' : '没精力了')) + '</div>' +
+      (undo.length && !busy ? '<button class="undo" id="undo">撤销</button>' : '') +
+      '<button class="endbtn' + (S.energy <= 0 ? ' pulse' : '') + '" id="endt">结束这四天</button></div>' +
+      '<div class="tabs">' + GROUPS.map(function (x) { return '<button data-t="' + x.id + '"' + (x.id === tab ? ' class="on"' : '') + '>' + x.n + '</button>'; }).join('') + '</div>' +
+      '<div class="acts">' + g.a.map(function (id) {
+        var a = map[id]; var cost = (a.e ? a.e + ' 精力' : '') + (a.m ? (a.e ? ' · ' : '') + '¥' + a.m : '');
+        return '<button class="a" data-a="' + id + '"' + (a.ok && !busy ? '' : ' disabled') + '><div class="n"><span>' + esc(a.n) + '</span><i>' + cost + '</i></div><div class="d">' + esc(!a.ok && a.why ? a.why : a.d) + '</div></button>';
+      }).join('') + '</div>';
+    on(d, '[data-t]', function (el) { tab = el.getAttribute('data-t'); updDock(); });
+    on(d, '[data-a]', function (el) { doAct(el.getAttribute('data-a')); });
+    document.getElementById('endt').onclick = endTurnUI;
+    var ub = document.getElementById('undo'); if (ub) ub.onclick = undoLast;
+  }
+  function node(it, animate) {
+    var el = document.createElement('div');
+    if (it.k === 'sys') { el.className = 'it sys'; el.textContent = it.t; }
+    else if (it.k === 'act') { el.className = 'it act'; el.textContent = it.t; }
+    else if (it.k === 'noti') { el.className = 'it noti'; el.innerHTML = '<i>通知</i>' + esc(it.t); }
+    else if (it.k === 'event') { el.className = 'it event'; el.innerHTML = (it.title ? '<small>' + esc(it.title) + '</small>' : '') + esc(it.t); }
+    else if (it.k === 'rival') {
+      var r = Game.byId(RIVALS, it.rid);
+      el.className = 'it card rival';
+      el.innerHTML = '<div class="who"><div class="ava">' + (SUIT[r.niche] || '♣︎') + '</div><b>' + esc(r.n) + '</b><span>' + fmt(it.rF) + ' 粉 · ' + esc(r.bio) + '</span></div>' +
+        '<div class="body">' + esc(it.t) + '</div>' + (it.views ? '<div class="meta"><span>浏览 <b>' + fmt(it.views) + '</b></span></div>' : '');
+    } else if (it.k === 'post') {
+      var p = it.p;
+      el.className = 'it card' + (p.viral ? ' viral' : '');
+      el.innerHTML = '<div class="who"><div class="ava me">你</div><b>你</b><span>' + esc(Game.byId(NICHES, p.niche).n) + '</span>' +
+        '<span class="tag' + (p.viral ? ' boom' : '') + '">' + (p.viral ? '爆了 · ' : '') + Game.PT[p.type].n + '</span></div>' +
+        '<div class="body">' + esc(it.t) + '</div>' +
+        '<div class="meta"><span>浏览 <b class="v">' + fmt(p.views) + '</b></span><span>赞 <b>' + fmt(p.likes) + '</b></span><span>转 <b>' + fmt(p.rt) + '</b></span>' +
+        '<span class="gain">' + (p.gain > 0 ? '+' + fmt(p.gain) + ' 粉' : '没涨粉') + '</span></div>' +
+        (p.note ? '<div class="note">' + esc(p.note) + '</div>' : '') +
+        (p.cm || []).map(function (c) { return c.t.charAt(0) === '（' ? '<div class="cm solo">' + esc(c.t) + '</div>' : '<div class="cm"><b>' + esc(c.n) + '</b>' + esc(c.t) + '</div>'; }).join('');
+      if (animate) countUp(el.querySelector('.v'), p.views, 700);
+    }
+    return el;
+  }
+  function divider(turn) {
+    var el = document.createElement('div'); el.className = 'it turn';
+    el.innerHTML = '<span>第 ' + turn + ' 回合 · 第 ' + dr(turn) + ' 天</span>'; return el;
+  }
+  function addItem(feed, it, animate) {
+    function put(el) { if (desk) feed.insertBefore(el, feed.firstChild); else feed.appendChild(el); }
+    if (it.turn !== lastTurn) { put(divider(it.turn)); lastTurn = it.turn; }
+    put(node(it, animate)); lastFid = it.id;
+  }
+  function appendFeed(animate) {
+    var feed = document.getElementById('feed'); if (!feed) return;
+    S.feed.forEach(function (it) { if (it.id > lastFid) addItem(feed, it, animate); });
+    feed.scrollTop = desk ? 0 : feed.scrollHeight;
+  }
+  function refresh() { appendFeed(false); updBar(); updDock(); }
+
+  // ---------- 回合流程 ----------
+  function beginTurn() {
+    undo = [];
+    Game.startTurn(S);
+    (S.notes || []).forEach(function (n) { say(S, 'sys', n); });
+    save(); refresh();
+    if (S.ev) setTimeout(showEvent, 250);
+  }
+  function showEvent() {
+    var e = Game.currentEvent(S); if (!e) return;
+    var opts = Game.eventOptions(S, e);
+    var m = sheet('<div class="k">第 ' + ((S.turn - 1) * D + 1) + ' 天 · 突发</div><h3><i>♦︎</i>' + esc(e.title || '事件') + '</h3><p>' + esc(Game.eventText(S, e)) + '</p>' +
+      opts.map(function (o) { return '<button class="ch" data-i="' + o.i + '"' + (o.ok ? '' : ' disabled') + '>' + esc(o.label) + (!o.ok && o.why ? '<small>' + esc(o.why) + '</small>' : '') + '</button>'; }).join(''));
+    on(m, '[data-i]', function (el) {
+      undo = [];
+      var title = e.title, res = Game.chooseEvent(S, +el.getAttribute('data-i'));
+      save();
+      var m2 = sheet('<div class="k">结果</div><h3><i>♦︎</i>' + esc(title || '事件') + '</h3><p class="res">' + esc(res) + '</p><button class="btn primary" id="ok">' + (S.ended ? '……' : '继续') + '</button>');
+      m2.querySelector('#ok').onclick = function () { closeSheet(); refresh(); if (S.ended) ending(); };
+    });
+  }
+  function doAct(id) {
+    if (busy || S.ended) return;
+    var a = Game.byId(Game.ACTIONS, id);
+    if (a.param === 'niche') { pickNiche(); return; }
+    run(id);
+  }
+  // 可以撤销的行动：结果要到回合结算才揭晓的那些。当场出结果的（回复大V、买粉、吵架、搞钱等）不能撤销，否则可以反复刷运气。
+  var UNDOABLE = { short: 1, hot: 1, tut: 1, long: 1, video: 1, gift: 1, repost: 1, lottery: 1, rest: 1, blue: 1 };
+  var undo = [];
+  function undoLast() {
+    if (busy || !undo.length || S.ended) return;
+    var snap = undo.pop(), rest = undo; S = JSON.parse(snap); save(); game(); undo = rest; updDock(); toast('已撤销');
+  }
+  function run(id, param) {
+    var snap = UNDOABLE[id] ? JSON.stringify(S) : null;
+    var msg = Game.act(S, id, param); if (msg == null) return;
+    if (snap) undo.push(snap); else undo = [];
+    say(S, 'act', msg); save(); refresh();
+    if (S.ended) setTimeout(ending, 500);
+  }
+  function pickNiche() {
+    var m = sheet('<div class="k">换赛道</div><h3><i>♣︎</i>换成哪个？</h3><p class="muted" style="font-size:13px">会掉 15% 的粉，账号权重也会降一点。</p>' +
+      NICHES.filter(function (n) { return n.id !== S.niche; }).map(function (n) { return '<button class="ch" data-n="' + n.id + '"><b>' + esc(n.n) + '</b><small>' + esc(n.d) + '</small></button>'; }).join('') +
+      '<button class="btn small" id="cancel">算了</button>');
+    on(m, '[data-n]', function (el) { closeSheet(); run('switch', el.getAttribute('data-n')); });
+    m.querySelector('#cancel').onclick = closeSheet;
+  }
+  function endTurnUI() {
+    if (busy || S.ended) return;
+    busy = true; updDock();
+    undo = [];
+    var turn = S.turn, sum = Game.endTurn(S); save();
+    var feed = document.getElementById('feed');
+    var items = S.feed.filter(function (it) { return it.id > lastFid; }), i = 0;
+    function next() {
+      if (i < items.length) { addItem(feed, items[i++], true); feed.scrollTop = desk ? 0 : feed.scrollHeight; setTimeout(next, items[i - 1].k === 'post' ? 420 : 220); }
+      else setTimeout(function () { summary(turn, sum); }, 450);
+    }
+    next();
+  }
+  function summary(turn, sum) {
+    updBar();
+    var best = null; sum.posts.forEach(function (p) { if (!best || p.views > best.views) best = p; });
+    var notes = sum.notes.slice();
+    if (!sum.posts.length) notes.unshift('这四天你一条帖子都没发。账号权重在往下掉。');
+    var head = best && best.viral ? ['有一条爆了', '爆了。你的手在抖', '通知栏炸了'] : sum.dF > 500 ? ['涨得不错', '今天可以多加一个蛋', '数据好得不像你的号'] : sum.dF > 0 ? ['涨了一点', '聊胜于无', '蚊子腿也是肉', '又混过了四天'] : sum.dF < 0 ? ['掉粉了', '有人悄悄走了', '粉丝数在往回走'] : ['无事发生', '风平浪静', '平台好像把你忘了'];
+    head = head[(turn + Math.abs(Math.round(sum.dF))) % head.length];
+    if (S.frozen && !S.ended) notes.push('后台弹出一条通知，你还没来得及点开。');
+    var m = sheet('<div class="k">第 ' + turn + ' 回合结算 · 第 ' + turn * D + ' 天</div><h3><i>♠︎</i>' + head + '</h3>' +
+      '<div class="delta"><div><small>粉丝</small><b class="' + cls(sum.dF) + '">' + sign(sum.dF, true) + '</b></div>' +
+      '<div><small>心态</small><b class="' + cls(sum.dMood) + '">' + sign(sum.dMood) + '</b></div>' +
+      '<div><small>钱</small><b class="' + cls(sum.dMoney) + '">' + sign(sum.dMoney, true) + '</b></div></div>' +
+      (best ? '<p class="muted" style="font-size:13.5px;margin:0 0 8px">这几天最好的一条：' + fmt(best.views) + ' 浏览（' + Game.PT[best.type].n + '）</p>' : '') +
+      (notes.length ? '<ul class="notes">' + notes.map(function (n) { return '<li>' + esc(n) + '</li>'; }).join('') + '</ul>' : '') +
+      '<button class="btn primary" id="ok">' + (S.ended ? DAYS + ' 天到了' : '下一回合') + '</button>');
+    if (S.ended && S.endId && Game.byId(ENDINGS, S.endId) && !Game.byId(ENDINGS, S.endId).when) m.querySelector('#ok').textContent = '……';
+    m.querySelector('#ok').onclick = function () { closeSheet(); busy = false; if (S.ended) ending(); else beginTurn(); };
+  }
+  function menu() {
+    var m = sheet('<div class="k">菜单</div><h3><i>♣︎</i>第 ' + S.turn + ' 回合</h3>' +
+      '<button class="ch" id="m1">继续玩</button><button class="ch" id="m2">结局图鉴</button><button class="ch" id="mt">' + themeLabel() + '</button><button class="ch" id="m3">存档并回首页</button><button class="ch" id="m4">放弃这一局</button>' +
+      '<p class="muted" style="font-size:12px;margin-top:12px">本局种子 ' + S.seed + '</p>');
+    m.querySelector('#m1').onclick = closeSheet;
+    m.querySelector('#mt').onclick = function () { toggleTheme(); closeSheet(); };
+    m.querySelector('#m2').onclick = function () { closeSheet(); dex(game); };
+    m.querySelector('#m3').onclick = function () { save(); home(); };
+    m.querySelector('#m4').onclick = function () { lsDel('xsim_save'); home(); };
+  }
+
+  // ---------- 结局 ----------
+  function shareText() {
+    var e = Game.endingOf(S), u = pageUrl();
+    return '我在「' + GAME + '」里撑到了第 ' + Game.days(S) + ' 天，' + fmt(S.F) + ' 粉。\n结局：「' + e.t + '」\n' + e.q + (u ? '\n' + u : '');
+  }
+  function ending() {
+    closeSheet(); busy = false; app.className = '';
+    var e = Game.endingOf(S);
+    if (!S.done) {
+      S.done = true; S.endText = Game.endingText(S);
+      var achs = Game.achsOf(S); S.newAchs = achs.filter(function (a) { return !META.achs[a]; });
+      S.firstTime = !META.endings[e.id];
+      achs.forEach(function (a) { META.achs[a] = 1; });
+      META.endings[e.id] = (META.endings[e.id] || 0) + 1; META.runs++; META.best = Math.max(META.best, S.st.peak);
+      lsSet('xsim_meta', META); save();
+    }
+    var banned = /^ban/.test(e.id);
+    app.innerHTML = '<div class="page"><div class="end scroll" style="flex:1">' +
+      '<div class="k">' + (banned ? '账号已停用' : '结局') + ' · 第 ' + Game.days(S) + ' 天' + (S.firstTime ? ' · <span class="gold">新结局</span>' : '') + '</div>' +
+      '<h2>' + esc(e.t) + '</h2><p class="d">' + esc(S.endText) + '</p>' +
+      '<div class="kv"><div><small>粉丝</small><b>' + fmt(S.F) + '</b></div><div><small>真粉率</small><b>' + Math.round(Game.realPct(S) * 100) + '%</b></div><div><small>赚到</small><b>¥' + fmt(S.st.earned) + '</b></div>' +
+      '<div><small>发帖</small><b>' + S.st.posts + '</b></div><div><small>最高浏览</small><b>' + fmt(S.st.maxViews) + '</b></div><div><small>口碑</small><b>' + Math.round(S.rep) + '</b></div></div>' +
+      (S.newAchs && S.newAchs.length ? '<div class="newach">解锁成就：' + S.newAchs.map(function (id) { var a = Game.byId(ACHS, id); return '<b>' + esc(a.t) + '</b>'; }).join('、') + '</div>' : '') +
+      '<img class="cardimg" id="cardimg" alt="战绩卡"><div class="hint">长按图片可以保存，发到评论区</div>' +
+      '<button class="btn primary" id="again">再来一局</button>' +
+      '<div class="row"><button class="btn small" id="savec">保存战绩卡</button><button class="btn small" id="copy">复制战绩</button></div>' +
+      '<div class="row"><a class="btn small" id="tox" target="_blank" rel="noopener" style="text-decoration:none;color:inherit">发到 X</a>' +
+      '<a class="btn small" target="_blank" rel="noopener" style="text-decoration:none;color:inherit" href="https://x.com/' + AUTHOR.handle + '">关注作者</a></div>' +
+      '<button class="btn small" id="dex2">结局图鉴 ' + Object.keys(META.endings).length + ' / ' + ENDINGS.length + '</button>' +
+      '<p class="muted" style="font-size:12px;text-align:center;margin:14px 0 0">本局种子 ' + S.seed + '</p>' + footHtml() + '</div></div>';
+    var url = '';
+    try { url = drawCard().toDataURL('image/png'); document.getElementById('cardimg').src = url; } catch (err) { document.getElementById('cardimg').style.display = 'none'; }
+    document.getElementById('again').onclick = function () { lsDel('xsim_save'); setup(); };
+    document.getElementById('dex2').onclick = function () { dex(ending); };
+    document.getElementById('tox').href = 'https://x.com/intent/post?text=' + encodeURIComponent(shareText());
+    document.getElementById('savec').onclick = function () {
+      if (!url) return; var a = document.createElement('a'); a.href = url; a.download = 'x-sim-' + e.id + '.png';
+      document.body.appendChild(a); a.click(); document.body.removeChild(a); toast('存不下来的话，长按图片保存');
+    };
+    document.getElementById('copy').onclick = function () {
+      var t = shareText();
+      function fb() { var ta = document.createElement('textarea'); ta.value = t; document.body.appendChild(ta); ta.select(); try { document.execCommand('copy'); toast('已复制'); } catch (er) { toast('复制失败'); } document.body.removeChild(ta); }
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(function () { toast('已复制'); }, fb); else fb();
+    };
+  }
+  function wrap(ctx, text, maxW) {
+    var lines = [], line = '';
+    for (var i = 0; i < text.length; i++) {
+      var ch = text[i];
+      if (ch === '\n') { lines.push(line); line = ''; continue; }
+      if (ctx.measureText(line + ch).width > maxW && line) {
+        if ('，。、！？：；）」』”'.indexOf(ch) >= 0) { line += ch; lines.push(line); line = ''; continue; }
+        lines.push(line); line = ch;
+      } else line += ch;
+    }
+    if (line) lines.push(line); return lines;
+  }
+  function drawCard() {
+    var W = 900, H = 1200, c = document.createElement('canvas'); c.width = W; c.height = H;
+    var x = c.getContext('2d'), e = Game.endingOf(S);
+    var serif = '"Songti SC","Noto Serif SC","Source Han Serif SC",STSong,SimSun,serif';
+    var sans = '-apple-system,"PingFang SC","Microsoft YaHei","Noto Sans SC",sans-serif';
+    var mono = 'Menlo,Consolas,monospace';
+    x.fillStyle = '#ffffff'; x.fillRect(0, 0, W, H);
+    x.fillStyle = 'rgba(15,20,25,.05)'; x.font = '700 760px ' + serif; x.textAlign = 'center'; x.fillText(/^ban/.test(e.id) ? '♠︎' : '♥︎', W - 190, H - 250);
+    x.strokeStyle = '#0f1419'; x.lineWidth = 4; x.strokeRect(34, 34, W - 68, H - 68);
+    x.strokeStyle = 'rgba(15,20,25,.18)'; x.lineWidth = 1; x.strokeRect(46, 46, W - 92, H - 92);
+    x.textAlign = 'left'; x.fillStyle = '#536471'; x.font = '500 30px ' + sans; x.fillText(GAME, 86, 126);
+    x.textAlign = 'right'; x.font = '28px ' + mono; x.fillText('DAY ' + Game.days(S) + ' / ' + DAYS, W - 86, 126);
+    x.textAlign = 'left'; x.fillStyle = '#d63a2f'; x.font = '500 30px ' + sans; x.fillText(/^ban/.test(e.id) ? '账号已停用' : '结局', 86, 250);
+    x.fillStyle = '#0f1419'; var size = e.t.length > 9 ? 78 : 96; x.font = '700 ' + size + 'px ' + serif;
+    var y = 250 + size + 26; wrap(x, e.t, W - 172).forEach(function (l) { x.fillText(l, 86, y); y += size * 1.22; });
+    x.fillStyle = '#9c7410'; x.font = '400 38px ' + serif; y += 14;
+    wrap(x, '「' + e.q + '」', W - 172).forEach(function (l) { x.fillText(l, 86, y); y += 56; });
+    var rows = [['粉丝', fmt(S.F)], ['真粉率', Math.round(Game.realPct(S) * 100) + '%'], ['赚到', '¥' + fmt(S.st.earned)], ['发帖', String(S.st.posts)], ['最高浏览', fmt(S.st.maxViews)], ['口碑', String(Math.round(S.rep))]];
+    var gy = Math.max(y + 40, 690), cw = (W - 172) / 3;
+    rows.forEach(function (r, i) {
+      var cx = 86 + (i % 3) * cw, cy = gy + Math.floor(i / 3) * 150;
+      x.fillStyle = '#84909a'; x.font = '26px ' + sans; x.fillText(r[0], cx, cy);
+      x.fillStyle = '#0f1419'; x.font = '600 50px ' + mono; x.fillText(r[1], cx, cy + 62);
+    });
+    x.fillStyle = '#536471'; x.font = '26px ' + sans;
+    x.fillText(Game.byId(ORIGINS, S.origin).n + ' · ' + Game.byId(NICHES, S.niche).n + ' · 种子 ' + S.seed, 86, gy + 320);
+    x.strokeStyle = '#dfe5e8'; x.beginPath(); x.moveTo(86, H - 150); x.lineTo(W - 86, H - 150); x.stroke();
+    x.fillStyle = '#0f1419'; x.font = '500 28px ' + sans; x.fillText('作者 ' + AUTHOR.name + ' @' + AUTHOR.handle, 86, H - 98);
+    var u = pageUrl().replace(/^https?:\/\//, '').replace(/\/(index\.html)?$/, '');
+    if (u) { x.textAlign = 'right'; x.fillStyle = '#536471'; x.font = '24px ' + mono; if (x.measureText(u).width < 380) x.fillText(u, W - 86, H - 98); }
+    return c;
+  }
+
+  // ---------- 图鉴 ----------
+  function dex(back) {
+    var got = Object.keys(META.endings).length, ga = Object.keys(META.achs).length; app.className = '';
+    app.innerHTML = '<div class="page"><div class="page-h"><h2>图鉴</h2><button class="muted" id="back">返回</button></div><div class="page-b scroll">' +
+      '<div class="sec">结局 ' + got + ' / ' + ENDINGS.length + ' · 玩了 ' + META.runs + ' 局</div><div class="dex">' +
+      ENDINGS.map(function (e) { var n = META.endings[e.id];
+        return n ? '<div class="dx got"><b>' + esc(e.t) + '</b><span>' + esc(e.q) + '</span></div>' : '<div class="dx lock"><b>? ? ?</b><span>' + (e.hidden ? '隐藏结局' : '还没遇到') + '</span></div>'; }).join('') +
+      '</div><div class="sec">成就 ' + ga + ' / ' + ACHS.length + '</div><div class="dex">' +
+      ACHS.map(function (a) { return META.achs[a.id] ? '<div class="dx got"><b>' + esc(a.t) + '</b><span>' + esc(a.d) + '</span></div>' : '<div class="dx lock"><b>? ? ?</b><span>' + esc(a.d) + '</span></div>'; }).join('') +
+      '</div>' + footHtml() + '</div></div>';
+    document.getElementById('back').onclick = back || home;
+  }
+
+  if (mq) { var onMq = function () { if (S && app.className === 'game' && !busy && !document.getElementById('mask')) game(); }; if (mq.addEventListener) mq.addEventListener('change', onMq); else if (mq.addListener) mq.addListener(onMq); }
+  window.__xsim = { home: home, state: function () { return S; } };
+  home();
+})();
+
+</script>
+</body>
+</html>
