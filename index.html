@@ -2172,11 +2172,11 @@ var ACHS = [
       x.fillStyle = '#0f1419'; x.font = '600 50px ' + mono; x.fillText(r[1], cx, cy + 62);
     });
     x.fillStyle = '#536471'; x.font = '26px ' + sans;
-    x.fillText(Game.byId(ORIGINS, S.origin).n + ' · ' + Game.byId(NICHES, S.niche).n + ' · 种子 ' + S.seed, 86, gy + 320);
-    x.strokeStyle = '#dfe5e8'; x.beginPath(); x.moveTo(86, H - 150); x.lineTo(W - 86, H - 150); x.stroke();
-    x.fillStyle = '#0f1419'; x.font = '500 28px ' + sans; x.fillText('作者 ' + AUTHOR.name + ' @' + AUTHOR.handle, 86, H - 98);
+    x.fillText(Game.byId(ORIGINS, S.origin).n + ' · ' + Game.byId(NICHES, S.niche).n + ' · 种子 ' + S.seed, 86, gy + 296);
+    x.strokeStyle = '#dfe5e8'; x.beginPath(); x.moveTo(86, H - 182); x.lineTo(W - 86, H - 182); x.stroke();
+    x.fillStyle = '#0f1419'; x.font = '500 28px ' + sans; x.fillText('作者 ' + AUTHOR.name + ' @' + AUTHOR.handle, 86, H - 126);
     var u = pageUrl().replace(/^https?:\/\//, '').replace(/\/(index\.html)?$/, '');
-    if (u) { x.textAlign = 'right'; x.fillStyle = '#536471'; x.font = '24px ' + mono; if (x.measureText(u).width < 380) x.fillText(u, W - 86, H - 98); }
+    if (u) { x.fillStyle = '#d63a2f'; x.font = '26px ' + mono; if (x.measureText(u).width < W - 172) x.fillText(u, 86, H - 82); }
     return c;
   }
 
